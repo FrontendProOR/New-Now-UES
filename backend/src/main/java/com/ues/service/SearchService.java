@@ -2,7 +2,6 @@ package com.ues.service;
 
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
-import co.elastic.clients.json.JsonData;
 import com.ues.dto.SearchResultDto;
 import com.ues.model.LocationIndex;
 import org.apache.logging.log4j.LogManager;
@@ -143,9 +142,12 @@ public class SearchService {
         if (from == null && to == null) return;
 
         builder.filter(RangeQuery.of(rq -> rq
-                .field(field)
-                .gte(from != null ? JsonData.of(from) : null)
-                .lte(to != null ? JsonData.of(to) : null)
+                .number(nrq -> {
+                    nrq.field(field);
+                    if (from != null) nrq.gte(from.doubleValue());
+                    if (to != null) nrq.lte(to.doubleValue());
+                    return nrq;
+                })
         )._toQuery());
     }
 

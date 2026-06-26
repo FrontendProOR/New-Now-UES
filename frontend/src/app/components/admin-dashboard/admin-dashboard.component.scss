@@ -1,0 +1,31 @@
+.container {
+  padding: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.tab-content {
+  padding: 24px 0;
+}
+
+.request-card, .location-card {
+  margin-bottom: 12px;
+}
+
+.form-card {
+  margin-bottom: 24px;
+  padding: 16px;
+}
+
+.create-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.file-input {
+  margin: 8px 0;
+}

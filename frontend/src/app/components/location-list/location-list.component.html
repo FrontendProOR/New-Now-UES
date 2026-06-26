@@ -1,0 +1,38 @@
+<div class="container">
+  <h2>Locations</h2>
+
+  <mat-card class="search-card">
+    <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="search-form">
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Address</mat-label>
+        <input matInput formControlName="address">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Type</mat-label>
+        <input matInput formControlName="type">
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit">Search</button>
+      <button mat-button type="button" (click)="onClear()">Clear</button>
+    </form>
+  </mat-card>
+
+  <div class="card-grid">
+    <mat-card *ngFor="let loc of locations" [routerLink]="['/locations', loc.id]">
+      <img mat-card-image [src]="loc.imageUrl" [alt]="loc.name" *ngIf="loc.imageUrl">
+      <mat-card-header>
+        <mat-card-title>{{ loc.name }}</mat-card-title>
+        <mat-card-subtitle>{{ loc.address }} · {{ loc.type }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p *ngIf="loc.totalRating">Rating: {{ loc.totalRating | number:'1.1-1' }}</p>
+        <p *ngIf="loc.description">{{ loc.description | slice:0:100 }}...</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <p *ngIf="locations.length === 0">No locations found.</p>
+</div>

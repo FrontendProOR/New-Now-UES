@@ -1,9 +1,5 @@
 package com.ues.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -14,10 +10,6 @@ import org.springframework.data.elasticsearch.annotations.Setting;
 
 @Document(indexName = "locations")
 @Setting(settingPath = "/elasticsearch/settings.json")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class LocationIndex {
 
     @Id
@@ -54,4 +46,100 @@ public class LocationIndex {
 
     @Field(type = FieldType.Float)
     private Float avgExperienceGrade;
+
+    public LocationIndex() {
+    }
+
+    public LocationIndex(Long id, String name, String description, String fileDescription, Integer reviewCount, Float avgPerformanceGrade, Float avgSoundGrade, Float avgLightingGrade, Float avgSpaceGrade, Float avgExperienceGrade) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.fileDescription = fileDescription;
+        this.reviewCount = reviewCount;
+        this.avgPerformanceGrade = avgPerformanceGrade;
+        this.avgSoundGrade = avgSoundGrade;
+        this.avgLightingGrade = avgLightingGrade;
+        this.avgSpaceGrade = avgSpaceGrade;
+        this.avgExperienceGrade = avgExperienceGrade;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getFileDescription() {
+        return fileDescription;
+    }
+
+    public void setFileDescription(String fileDescription) {
+        this.fileDescription = fileDescription;
+    }
+
+    public Integer getReviewCount() {
+        return reviewCount;
+    }
+
+    public void setReviewCount(Integer reviewCount) {
+        this.reviewCount = reviewCount;
+    }
+
+    public Float getAvgPerformanceGrade() {
+        return avgPerformanceGrade;
+    }
+
+    public void setAvgPerformanceGrade(Float avgPerformanceGrade) {
+        this.avgPerformanceGrade = avgPerformanceGrade;
+    }
+
+    public Float getAvgSoundGrade() {
+        return avgSoundGrade;
+    }
+
+    public void setAvgSoundGrade(Float avgSoundGrade) {
+        this.avgSoundGrade = avgSoundGrade;
+    }
+
+    public Float getAvgLightingGrade() {
+        return avgLightingGrade;
+    }
+
+    public void setAvgLightingGrade(Float avgLightingGrade) {
+        this.avgLightingGrade = avgLightingGrade;
+    }
+
+    public Float getAvgSpaceGrade() {
+        return avgSpaceGrade;
+    }
+
+    public void setAvgSpaceGrade(Float avgSpaceGrade) {
+        this.avgSpaceGrade = avgSpaceGrade;
+    }
+
+    public Float getAvgExperienceGrade() {
+        return avgExperienceGrade;
+    }
+
+    public void setAvgExperienceGrade(Float avgExperienceGrade) {
+        this.avgExperienceGrade = avgExperienceGrade;
+    }
 }

@@ -1,0 +1,92 @@
+<div class="container">
+  <h2>Manager Dashboard</h2>
+
+  <mat-form-field appearance="outline" *ngIf="managedLocations.length > 1">
+    <mat-label>Select Location</mat-label>
+    <mat-select [(value)]="selectedLocationId" (selectionChange)="onLocationChange()">
+      <mat-option *ngFor="let loc of managedLocations" [value]="loc.id">{{ loc.name }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <h3 *ngIf="managedLocations.length === 1">{{ managedLocations[0].name }}</h3>
+
+  <mat-tab-group *ngIf="selectedLocationId">
+    <mat-tab label="Events">
+      <div class="tab-content">
+        <mat-card class="form-card">
+          <mat-card-header><mat-card-title>Create Event</mat-card-title></mat-card-header>
+          <mat-card-content>
+            <form [formGroup]="eventForm" (ngSubmit)="createEvent()" class="create-form">
+              <mat-form-field appearance="outline"><mat-label>Name</mat-label><input matInput formControlName="name"></mat-form-field>
+              <mat-form-field appearance="outline"><mat-label>Address</mat-label><input matInput formControlName="address"></mat-form-field>
+              <mat-form-field appearance="outline"><mat-label>Type</mat-label><input matInput formControlName="type"></mat-form-field>
+              <mat-form-field appearance="outline"><mat-label>Date</mat-label><input matInput formControlName="date" type="date"></mat-form-field>
+              <mat-form-field appearance="outline"><mat-label>Price (0 = free)</mat-label><input matInput formControlName="price" type="number"></mat-form-field>
+              <mat-checkbox formControlName="recurrent">Recurrent event</mat-checkbox>
+              <div class="file-input"><label>Image *:</label><input type="file" (change)="onEventImageSelected($event)" accept="image/*"></div>
+              <button mat-raised-button color="primary" type="submit" [disabled]="eventForm.invalid || !selectedEventImage">Create Event</button>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Reviews ({{ reviews.length }})">
+      <div class="tab-content">
+        <mat-card *ngFor="let review of reviews" class="review-card">
+          <mat-card-header>
+            <mat-card-title>{{ review.eventName }}</mat-card-title>
+            <mat-card-subtitle>{{ review.authorName }} · {{ review.createdAt | date:'short' }}
+              <span *ngIf="review.hidden" class="hidden-badge">HIDDEN</span>
+            </mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <p *ngIf="review.rate?.overallImpression">Overall: {{ review.rate.overallImpression }}/10</p>
+            <p *ngIf="review.rootComment">{{ review.rootComment }}</p>
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-button (click)="hideReview(review.id)" *ngIf="!review.hidden">Hide</button>
+            <button mat-button color="warn" (click)="deleteReview(review.id)">Delete</button>
+          </mat-card-actions>
+        </mat-card>
+        <p *ngIf="reviews.length === 0">No reviews.</p>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Analytics">
+      <div class="tab-content">
+        <div class="period-selector">
+          <mat-form-field appearance="outline">
+            <mat-label>Period</mat-label>
+            <mat-select [(value)]="period" (selectionChange)="loadAnalytics()">
+              <mat-option value="weekly">Weekly</mat-option>
+              <mat-option value="monthly">Monthly</mat-option>
+              <mat-option value="yearly">Yearly</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div *ngIf="analytics" class="analytics-content">
+          <div class="stats-grid">
+            <mat-card><mat-card-header><mat-card-title>{{ analytics.totalEvents }}</mat-card-title></mat-card-header><mat-card-content>Total Events</mat-card-content></mat-card>
+            <mat-card><mat-card-header><mat-card-title>{{ analytics.recurrentEvents }}</mat-card-title></mat-card-header><mat-card-content>Recurrent</mat-card-content></mat-card>
+            <mat-card><mat-card-header><mat-card-title>{{ analytics.freeEvents }}</mat-card-title></mat-card-header><mat-card-content>Free</mat-card-content></mat-card>
+            <mat-card><mat-card-header><mat-card-title>{{ analytics.paidEvents }}</mat-card-title></mat-card-header><mat-card-content>Paid</mat-card-content></mat-card>
+          </div>
+
+          <div class="chart-container" *ngIf="chartData">
+            <canvas baseChart [data]="chartData" [options]="chartOptions" type="pie"></canvas>
+          </div>
+
+          <h4 *ngIf="analytics.topEventsByRating.length > 0">Top Events by Rating</h4>
+          <mat-list *ngIf="analytics.topEventsByRating.length > 0">
+            <mat-list-item *ngFor="let e of analytics.topEventsByRating">
+              {{ e.eventName }} — {{ e.averageRating | number:'1.1-1' }}
+            </mat-list-item>
+          </mat-list>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
+  <p *ngIf="managedLocations.length === 0">You are not managing any locations.</p>
+</div>

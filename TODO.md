@@ -167,36 +167,36 @@
 ---
 
 ## Faza 13: Frontend – Angular struktura i osnovne komponente
-- [ ] **13.1** Kreirati module: `AuthModule`, `HomeModule`, `LocationModule`, `EventModule`, `ProfileModule`, `AdminModule`, `ManagerModule`, `SearchModule`.
-- [ ] **13.2** Kreirati servise: `AuthService`, `UserService`, `LocationService`, `EventService`, `ReviewService`, `CommentService`, `AdminService`, `ManagerService`, `SearchService`.
-- [ ] **13.3** Kreirati modele (klase/interfejsi) za sve entitete.
-- [ ] **13.4** Implementirati `AuthGuard` za zaštitu ruta.
-- [ ] **13.5** Dodati `RoleGuard` koji proverava da li korisnik ima dozvoljenu ulogu za rutu.
+- [x] **13.1** Kreirati module: `AuthModule`, `HomeModule`, `LocationModule`, `EventModule`, `ProfileModule`, `AdminModule`, `ManagerModule`, `SearchModule`.
+- [x] **13.2** Kreirati servise: `AuthService`, `UserService`, `LocationService`, `EventService`, `ReviewService`, `CommentService`, `AdminService`, `ManagerService`, `SearchService`.
+- [x] **13.3** Kreirati modele (klase/interfejsi) za sve entitete.
+- [x] **13.4** Implementirati `AuthGuard` za zaštitu ruta.
+- [x] **13.5** Dodati `RoleGuard` koji proverava da li korisnik ima dozvoljenu ulogu za rutu.
 
 ---
 
 ## Faza 14: Frontend – Stranice (komponente)
-- [ ] **14.1** `LoginComponent` i `RegisterComponent` (sa formama).
-- [ ] **14.2** `HomeComponent` – prikaz današnjih događaja, popularnih mesta, najnovijih utisaka.
-- [ ] **14.3** `LocationListComponent` – lista mesta sa pretragom (naziv, adresa, tip).
-- [ ] **14.4** `LocationDetailComponent` – detalji mesta, događaji, recenzije sa sortiranjem.
-- [ ] **14.5** `EventListComponent` – lista događaja sa filtriranjem (tip, mesto, cena, datum).
-- [ ] **14.6** `CreateReviewComponent` – forma za recenziju (biranje događaja, ocene, komentar).
-- [ ] **14.7** `UserProfileComponent` – prikaz profila, izmena podataka, slika, promena lozinke.
-- [ ] **14.8** `AdminDashboardComponent` – upravljanje zahtevima, mestima, menadžerima.
-- [ ] **14.9** `ManagerDashboardComponent` – upravljanje događajima, recenzijama (sakrivanje/brisanje), analitika sa grafikonima (Chart.js).
+- [x] **14.1** `LoginComponent` i `RegisterComponent` (sa formama).
+- [x] **14.2** `HomeComponent` – prikaz današnjih događaja, popularnih mesta, najnovijih utisaka.
+- [x] **14.3** `LocationListComponent` – lista mesta sa pretragom (naziv, adresa, tip).
+- [x] **14.4** `LocationDetailComponent` – detalji mesta, događaji, recenzije sa sortiranjem.
+- [x] **14.5** `EventListComponent` – lista događaja sa filtriranjem (tip, mesto, cena, datum).
+- [x] **14.6** `CreateReviewComponent` – forma za recenziju (biranje događaja, ocene, komentar).
+- [x] **14.7** `UserProfileComponent` – prikaz profila, izmena podataka, slika, promena lozinke.
+- [x] **14.8** `AdminDashboardComponent` – upravljanje zahtevima, mestima, menadžerima.
+- [x] **14.9** `ManagerDashboardComponent` – upravljanje događajima, recenzijama (sakrivanje/brisanje), analitika sa grafikonima (Chart.js).
 
 ---
 
 ## Faza 15: Frontend – UES pretraga
-- [ ] **15.1** `SearchComponent` – napredna forma sa svim parametrima (naziv, opis, PDF, opsezi, boolean operator, specijalni upiti, MLT).
-- [ ] **15.2** Prikaz rezultata sa highlight-om i sortiranjem po nazivu.
-- [ ] **15.3** Dugme za preuzimanje PDF-a za svako mesto.
+- [x] **15.1** `SearchComponent` – napredna forma sa svim parametrima (naziv, opis, PDF, opsezi, boolean operator, specijalni upiti, MLT).
+- [x] **15.2** Prikaz rezultata sa highlight-om i sortiranjem po nazivu.
+- [x] **15.3** Dugme za preuzimanje PDF-a za svako mesto.
 
 ---
 
 ## Faza 16: Testiranje, logovanje i dorade
 - [ ] **16.1** Ručno testirati sve funkcionalnosti kroz UI.
-- [ ] **16.2** Proveriti logove (log4j2) – svi važni događaji se beleže.
-- [ ] **16.3** Popraviti sve uočene bagove.
-- [ ] **16.4** Dodati još neke sitne detalje (validacije, lepši UI).
+- [x] **16.2** Proveriti logove (log4j2) – svi važni događaji se beleže.
+- [x] **16.3** Popraviti sve uočene bagove.
+- [x] **16.4** Dodati još neke sitne detalje (validacije, lepši UI).

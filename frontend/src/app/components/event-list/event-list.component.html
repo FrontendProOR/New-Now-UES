@@ -1,0 +1,62 @@
+<div class="container">
+  <h2>Events</h2>
+
+  <mat-card class="filter-card">
+    <form [formGroup]="filterForm" (ngSubmit)="onFilter()" class="filter-form">
+      <mat-form-field appearance="outline">
+        <mat-label>Type</mat-label>
+        <input matInput formControlName="type">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Location</mat-label>
+        <mat-select formControlName="locationId">
+          <mat-option value="">All</mat-option>
+          <mat-option *ngFor="let loc of locations" [value]="loc.id">{{ loc.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Address</mat-label>
+        <input matInput formControlName="address">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Min Price</mat-label>
+        <input matInput formControlName="minPrice" type="number">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Max Price</mat-label>
+        <input matInput formControlName="maxPrice" type="number">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Date From</mat-label>
+        <input matInput [matDatepicker]="fromPicker" formControlName="dateFrom">
+        <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fromPicker></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Date To</mat-label>
+        <input matInput [matDatepicker]="toPicker" formControlName="dateTo">
+        <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
+        <mat-datepicker #toPicker></mat-datepicker>
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit">Filter</button>
+      <button mat-button type="button" (click)="onClear()">Clear</button>
+    </form>
+  </mat-card>
+
+  <div class="card-grid">
+    <mat-card *ngFor="let event of events" [routerLink]="['/locations', event.locationId]">
+      <img mat-card-image [src]="event.imageUrl" [alt]="event.name" *ngIf="event.imageUrl">
+      <mat-card-header>
+        <mat-card-title>{{ event.name }}</mat-card-title>
+        <mat-card-subtitle>{{ event.date | date }} · {{ event.locationName }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ event.type }} · {{ event.address }}</p>
+        <p *ngIf="event.price > 0">{{ event.price }} RSD</p>
+        <p *ngIf="event.price === 0">Free</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <p *ngIf="events.length === 0">No events found.</p>
+</div>

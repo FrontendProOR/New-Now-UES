@@ -1,0 +1,46 @@
+<div class="home-container">
+  <h2>Today's Events</h2>
+  <div class="card-grid" *ngIf="todayEvents.length > 0; else noEvents">
+    <mat-card *ngFor="let event of todayEvents" [routerLink]="['/locations', event.locationId]">
+      <img mat-card-image [src]="event.imageUrl" [alt]="event.name" *ngIf="event.imageUrl">
+      <mat-card-header>
+        <mat-card-title>{{ event.name }}</mat-card-title>
+        <mat-card-subtitle>{{ event.locationName }} · {{ event.type }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ event.address }}</p>
+        <p *ngIf="event.price > 0">{{ event.price }} RSD</p>
+        <p *ngIf="event.price === 0">Free</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  <ng-template #noEvents><p>No events today.</p></ng-template>
+
+  <h2>Popular Locations</h2>
+  <div class="card-grid" *ngIf="popularLocations.length > 0">
+    <mat-card *ngFor="let loc of popularLocations" [routerLink]="['/locations', loc.id]">
+      <img mat-card-image [src]="loc.imageUrl" [alt]="loc.name" *ngIf="loc.imageUrl">
+      <mat-card-header>
+        <mat-card-title>{{ loc.name }}</mat-card-title>
+        <mat-card-subtitle>{{ loc.address }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Rating: {{ loc.totalRating | number:'1.1-1' }}</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <h2>Latest Reviews</h2>
+  <div *ngIf="latestReviews.length > 0">
+    <mat-card *ngFor="let review of latestReviews" class="review-card">
+      <mat-card-header>
+        <mat-card-title>{{ review.eventName }}</mat-card-title>
+        <mat-card-subtitle>by {{ review.authorName }} · {{ review.createdAt | date:'short' }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p *ngIf="review.rate?.overallImpression">Overall: {{ review.rate.overallImpression }}/10</p>
+        <p *ngIf="review.rootComment">{{ review.rootComment }}</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

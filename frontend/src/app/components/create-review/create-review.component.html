@@ -1,0 +1,47 @@
+<div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Write a Review</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="reviewForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Event</mat-label>
+          <mat-select formControlName="eventId">
+            <mat-option *ngFor="let event of events" [value]="event.id">
+              {{ event.name }} ({{ event.date | date }})
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <h3>Ratings (1-10, optional)</h3>
+        <div class="ratings-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Performance</mat-label>
+            <input matInput type="number" formControlName="performance" min="1" max="10">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Sound & Lighting</mat-label>
+            <input matInput type="number" formControlName="soundAndLighting" min="1" max="10">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Venue</mat-label>
+            <input matInput type="number" formControlName="venue" min="1" max="10">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Overall Impression</mat-label>
+            <input matInput type="number" formControlName="overallImpression" min="1" max="10">
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Comment (optional)</mat-label>
+          <textarea matInput formControlName="comment" rows="4"></textarea>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" [disabled]="reviewForm.invalid">Submit Review</button>
+        <button mat-button type="button" routerLink="/locations/{{locationId}}">Cancel</button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,91 @@
+<div class="container" *ngIf="user">
+  <h2>My Profile</h2>
+
+  <mat-tab-group [(selectedIndex)]="activeTab">
+    <mat-tab label="Profile">
+      <div class="tab-content">
+        <div class="profile-header">
+          <img [src]="user.imageUrl || 'https://via.placeholder.com/120'" class="avatar" alt="Profile">
+          <div>
+            <h3>{{ user.name || user.email }}</h3>
+            <p>{{ user.role }} · Member since {{ user.createdAt | date }}</p>
+          </div>
+        </div>
+
+        <form [formGroup]="profileForm" (ngSubmit)="onUpdateProfile()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Phone</mat-label>
+            <input matInput formControlName="phoneNumber">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Birthday</mat-label>
+            <input matInput formControlName="birthday" type="date">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Address</mat-label>
+            <input matInput formControlName="address">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>City</mat-label>
+            <input matInput formControlName="city">
+          </mat-form-field>
+          <div class="file-input">
+            <label>Profile Image:</label>
+            <input type="file" (change)="onImageSelected($event)" accept="image/*">
+          </div>
+          <button mat-raised-button color="primary" type="submit">Update Profile</button>
+        </form>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Change Password">
+      <div class="tab-content">
+        <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Current Password</mat-label>
+            <input matInput formControlName="oldPassword" type="password">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>New Password</mat-label>
+            <input matInput formControlName="newPassword" type="password">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Confirm New Password</mat-label>
+            <input matInput formControlName="confirmPassword" type="password">
+          </mat-form-field>
+          <button mat-raised-button color="warn" type="submit" [disabled]="passwordForm.invalid">Change Password</button>
+        </form>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="My Reviews ({{ reviews.length }})">
+      <div class="tab-content">
+        <mat-card *ngFor="let review of reviews" class="review-card">
+          <mat-card-header>
+            <mat-card-title>{{ review.eventName }} &#64; {{ review.locationName }}</mat-card-title>
+            <mat-card-subtitle>{{ review.createdAt | date:'short' }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <p *ngIf="review.rate?.overallImpression">Overall: {{ review.rate.overallImpression }}/10</p>
+          </mat-card-content>
+        </mat-card>
+        <p *ngIf="reviews.length === 0">No reviews yet.</p>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Managed Locations" *ngIf="managedLocations.length > 0">
+      <div class="tab-content">
+        <mat-card *ngFor="let loc of managedLocations" [routerLink]="['/locations', loc.id]" class="review-card">
+          <mat-card-header>
+            <mat-card-title>{{ loc.name }}</mat-card-title>
+            <mat-card-subtitle>{{ loc.address }}</mat-card-subtitle>
+          </mat-card-header>
+        </mat-card>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

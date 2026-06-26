@@ -1,0 +1,62 @@
+<div class="container" *ngIf="location">
+  <mat-card class="detail-card">
+    <img mat-card-image [src]="location.imageUrl" [alt]="location.name" *ngIf="location.imageUrl">
+    <mat-card-header>
+      <mat-card-title>{{ location.name }}</mat-card-title>
+      <mat-card-subtitle>{{ location.address }} · {{ location.type }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p *ngIf="location.totalRating">Rating: {{ location.totalRating | number:'1.1-1' }}</p>
+      <p *ngIf="location.description">{{ location.description }}</p>
+    </mat-card-content>
+  </mat-card>
+
+  <h3>Upcoming Events</h3>
+  <div class="card-grid" *ngIf="events.length > 0; else noEvents">
+    <mat-card *ngFor="let event of events">
+      <img mat-card-image [src]="event.imageUrl" [alt]="event.name" *ngIf="event.imageUrl">
+      <mat-card-header>
+        <mat-card-title>{{ event.name }}</mat-card-title>
+        <mat-card-subtitle>{{ event.date | date }} · {{ event.type }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p *ngIf="event.price > 0">{{ event.price }} RSD</p>
+        <p *ngIf="event.price === 0">Free</p>
+        <mat-chip *ngIf="event.recurrent">Recurrent</mat-chip>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  <ng-template #noEvents><p>No events at this location.</p></ng-template>
+
+  <div class="reviews-section">
+    <div class="reviews-header">
+      <h3>Reviews</h3>
+      <div class="sort-controls">
+        <button mat-button (click)="onSortChange('date')" [color]="sortBy === 'date' ? 'primary' : ''">By Date</button>
+        <button mat-button (click)="onSortChange('rating')" [color]="sortBy === 'rating' ? 'primary' : ''">By Rating</button>
+        <button mat-icon-button (click)="toggleDirection()">
+          <mat-icon>{{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <a mat-raised-button color="accent" [routerLink]="['/locations', location.id, 'review']">Write a Review</a>
+
+    <mat-card *ngFor="let review of reviews" class="review-card">
+      <mat-card-header>
+        <mat-card-title>{{ review.eventName }}</mat-card-title>
+        <mat-card-subtitle>{{ review.authorName }} · {{ review.createdAt | date:'short' }} · Maintained {{ review.eventCount }} times</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="ratings" *ngIf="review.rate">
+          <span *ngIf="review.rate.performance">Performance: {{ review.rate.performance }}/10</span>
+          <span *ngIf="review.rate.soundAndLighting">Sound & Light: {{ review.rate.soundAndLighting }}/10</span>
+          <span *ngIf="review.rate.venue">Venue: {{ review.rate.venue }}/10</span>
+          <span *ngIf="review.rate.overallImpression">Overall: {{ review.rate.overallImpression }}/10</span>
+        </div>
+        <p *ngIf="review.rootComment" class="comment-text">{{ review.rootComment }}</p>
+      </mat-card-content>
+    </mat-card>
+    <p *ngIf="reviews.length === 0">No reviews yet.</p>
+  </div>
+</div>
