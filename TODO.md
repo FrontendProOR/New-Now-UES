@@ -13,12 +13,12 @@
 - [x] **0.1** Kreirati Spring Boot projekat (Maven) sa dependencies: Web, JPA, MySQL, Security, Validation, Mail, Elasticsearch, MinIO, Log4j2.
 - [x] **0.2** Kreirati Angular projekat sa routing-om, dodati Angular Material i Chart.js.
 - [x] **0.3** Konfigurisati `application.properties` za MySQL, MinIO, Elasticsearch, email.
-- [ ] **0.4** Dodati `data.sql` za inicijalnog administratora (email: admin@ues.com, password hash).
-- [ ] **0.5** Dodati `data.sql` sa admin korisnikom:
+- [x] **0.4** Dodati `data.sql` za inicijalnog administratora (email: admin@ues.com, password hash).
+- [x] **0.5** Dodati `data.sql` sa admin korisnikom:
   - email: `admin@ues.com`
   - password: BCrypt hash od `admin123`
   - uloga: `ROLE_ADMIN`
-- [ ] **0.6** Konfigurisati CORS za Angular (localhost:4200).
+- [x] **0.6** Konfigurisati CORS za Angular (localhost:4200).
 
 ---
 
