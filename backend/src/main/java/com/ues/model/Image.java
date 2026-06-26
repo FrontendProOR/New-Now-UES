@@ -28,4 +28,7 @@ public class Image {
 
     @OneToOne(mappedBy = "image")
     private Event event;
+
+    @OneToOne(mappedBy = "profileImage")
+    private User user;
 }

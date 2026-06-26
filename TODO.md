@@ -111,13 +111,13 @@
 ---
 
 ## Faza 8: Profil korisnika i promena lozinke
-- [ ] **8.1** Kreirati `controller/UserController.java`:
+- [x] **8.1** Kreirati `controller/UserController.java`:
   - `GET /api/users/profile`
   - `PUT /api/users/profile` (izmena imena, telefona, rođendana, adrese, grada, slike)
   - `PUT /api/users/change-password` (stara + nova dva puta)
-- [ ] **8.2** Nakon promene lozinke poslati email.
-- [ ] **8.3** Dodati endpoint `GET /api/users/reviews` – svi utisci korisnika.
-- [ ] **8.4** Dodati endpoint `GET /api/users/managed-locations` – mesta na kojima je menadžer.
+- [x] **8.2** Nakon promene lozinke poslati email.
+- [x] **8.3** Dodati endpoint `GET /api/users/reviews` – svi utisci korisnika.
+- [x] **8.4** Dodati endpoint `GET /api/users/managed-locations` – mesta na kojima je menadžer.
 
 ---
 

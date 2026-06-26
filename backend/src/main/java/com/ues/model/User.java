@@ -52,6 +52,10 @@ public class User {
     @Column(nullable = false)
     private String role = "ROLE_USER";
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "profile_image_id")
+    private Image profileImage;
+
     @OneToMany(mappedBy = "author")
     private Set<Review> reviews = new HashSet<>();
 
