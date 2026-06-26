@@ -68,11 +68,11 @@
 ---
 
 ## Faza 4: Upravljanje događajima (Event) – menadžer
-- [ ] **4.1** Kreirati `controller/ManagerEventController.java`:
+- [x] **4.1** Kreirati `controller/ManagerEventController.java`:
   - `POST /api/manager/locations/{locationId}/events` (sa slikom)
   - `PUT /api/manager/events/{id}`
   - `DELETE /api/manager/events/{id}`
-- [ ] **4.2** Slika se čuva u MinIO, kreira se `Image` entitet.
+- [x] **4.2** Slika se čuva u MinIO, kreira se `Image` entitet.
 
 ---
 
