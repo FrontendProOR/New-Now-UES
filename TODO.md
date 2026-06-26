@@ -134,10 +134,10 @@
 ---
 
 ## Faza 10: Administratorske funkcije (dodela menadžera)
-- [ ] **10.1** U `controller/AdminController.java` dodati:
+- [x] **10.1** U `controller/AdminController.java` dodati:
   - `POST /api/admin/locations/{locationId}/managers` (dodeli korisnika sa startDate)
   - `DELETE /api/admin/locations/{locationId}/managers/{userId}` (postavi endDate)
-- [ ] **10.2** Validirati da korisnik postoji i da nije već aktivan menadžer na tom mestu.
+- [x] **10.2** Validirati da korisnik postoji i da nije već aktivan menadžer na tom mestu.
 
 ---
 

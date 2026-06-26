@@ -2,6 +2,7 @@ package com.ues.controller;
 
 import com.ues.dto.AccountRequestDto;
 import com.ues.service.AccountRequestService;
+import com.ues.service.ManagesService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +20,12 @@ public class AdminController {
     private static final Logger logger = LogManager.getLogger(AdminController.class);
 
     private final AccountRequestService accountRequestService;
+    private final ManagesService managesService;
 
-    public AdminController(AccountRequestService accountRequestService) {
+    public AdminController(AccountRequestService accountRequestService,
+                           ManagesService managesService) {
         this.accountRequestService = accountRequestService;
+        this.managesService = managesService;
     }
 
     @GetMapping("/account-requests")
@@ -48,5 +52,25 @@ public class AdminController {
         String reason = body != null ? body.get("reason") : null;
         logger.info("Admin rejecting account request id: {} with reason: {}", id, reason);
         return ResponseEntity.ok(accountRequestService.rejectRequest(id, reason));
+    }
+
+    @PostMapping("/locations/{locationId}/managers")
+    public ResponseEntity<String> assignManager(@PathVariable Long locationId,
+                                                 @RequestBody Map<String, Long> body) {
+        Long userId = body.get("userId");
+        if (userId == null) {
+            throw new IllegalArgumentException("userId is required");
+        }
+        logger.info("Admin assigning user id={} as manager of location id={}", userId, locationId);
+        managesService.assignManager(locationId, userId);
+        return ResponseEntity.ok("Manager assigned successfully");
+    }
+
+    @DeleteMapping("/locations/{locationId}/managers/{userId}")
+    public ResponseEntity<Void> removeManager(@PathVariable Long locationId,
+                                               @PathVariable Long userId) {
+        logger.info("Admin removing user id={} from managing location id={}", userId, locationId);
+        managesService.removeManager(locationId, userId);
+        return ResponseEntity.noContent().build();
     }
 }
