@@ -55,15 +55,15 @@
 ---
 
 ## Faza 3: Upravljanje mestima (Location) – administrator
-- [ ] **3.1** Kreirati `controller/AdminLocationController.java` (samo admin):
+- [x] **3.1** Kreirati `controller/AdminLocationController.java` (samo admin):
   - `POST /api/admin/locations` (sa slikom)
   - `PUT /api/admin/locations/{id}` (sva polja)
   - `DELETE /api/admin/locations/{id}`
-- [ ] **3.2** Implementirati MinIO upload za sliku (`util/MinioUtil.java`).
-- [ ] **3.3** Sačuvati `Image` entitet i povezati sa `Location`.
-- [ ] **3.4** Dodati `controller/ManagerLocationController.java` (samo menadžer):
+- [x] **3.2** Implementirati MinIO upload za sliku (`util/MinioUtil.java`).
+- [x] **3.3** Sačuvati `Image` entitet i povezati sa `Location`.
+- [x] **3.4** Dodati `controller/ManagerLocationController.java` (samo menadžer):
   - `PUT /api/manager/locations/{id}` (samo adresa, tip, opis)
-- [ ] **3.5** Omogućiti prikaz mesta sa ocenom (izračunato).
+- [x] **3.5** Omogućiti prikaz mesta sa ocenom (izračunato).
 
 ---
 
