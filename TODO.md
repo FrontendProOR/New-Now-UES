@@ -77,15 +77,15 @@
 ---
 
 ## Faza 5: Recenzije (Review) i ocene (Rate)
-- [ ] **5.1** Kreirati `controller/ReviewController.java`:
+- [x] **5.1** Kreirati `controller/ReviewController.java`:
   - `POST /api/locations/{locationId}/reviews` (samo prijavljeni)
   - Validacija: događaj mora biti redovan i već prošao.
-- [ ] **5.2** Pri kreiranju izračunati `eventCount` (broj pojavljivanja tog događaja do datuma).
-- [ ] **5.3** Sačuvati `Review`, `Rate`, opcioni komentar (koreni).
-- [ ] **5.4** Ažurirati `Location.totalRating` (prosek svih važećih recenzija).
-- [ ] **5.5** Kreirati endpoint za prikaz recenzija sa sortiranjem (po oceni i datumu).
-- [ ] **5.6** Dodati `deleted` boolean polje u `Review` (tehnički dodatak za logičko brisanje).
-- [ ] **5.7** Precizirati računanje `eventCount`: broj pojavljivanja događaja sa istim `name` i `type` na istom mestu do datuma recenzije.
+- [x] **5.2** Pri kreiranju izračunati `eventCount` (broj pojavljivanja tog događaja do datuma).
+- [x] **5.3** Sačuvati `Review`, `Rate`, opcioni komentar (koreni).
+- [x] **5.4** Ažurirati `Location.totalRating` (prosek svih važećih recenzija).
+- [x] **5.5** Kreirati endpoint za prikaz recenzija sa sortiranjem (po oceni i datumu).
+- [x] **5.6** Dodati `deleted` boolean polje u `Review` (tehnički dodatak za logičko brisanje).
+- [x] **5.7** Precizirati računanje `eventCount`: broj pojavljivanja događaja sa istim `name` i `type` na istom mestu do datuma recenzije.
 
 ---
 
