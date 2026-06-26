@@ -2,6 +2,7 @@ package com.ues.controller;
 
 import com.ues.dto.LocationDto;
 import com.ues.service.LocationService;
+import com.ues.service.PdfService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +18,11 @@ public class AdminLocationController {
     private static final Logger logger = LogManager.getLogger(AdminLocationController.class);
 
     private final LocationService locationService;
+    private final PdfService pdfService;
 
-    public AdminLocationController(LocationService locationService) {
+    public AdminLocationController(LocationService locationService, PdfService pdfService) {
         this.locationService = locationService;
+        this.pdfService = pdfService;
     }
 
     @PostMapping
@@ -52,5 +55,13 @@ public class AdminLocationController {
         logger.info("Admin deleting location id={}", id);
         locationService.deleteLocation(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/pdf")
+    public ResponseEntity<String> uploadPdf(@PathVariable Long id,
+                                             @RequestPart MultipartFile pdf) throws Exception {
+        logger.info("Admin uploading PDF for location id={}", id);
+        pdfService.uploadPdf(id, pdf);
+        return ResponseEntity.ok("PDF uploaded and indexed successfully");
     }
 }

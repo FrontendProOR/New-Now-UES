@@ -24,17 +24,20 @@ public class ReviewService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
+    private final LocationIndexService locationIndexService;
 
     public ReviewService(ReviewRepository reviewRepository,
                          LocationRepository locationRepository,
                          EventRepository eventRepository,
                          UserRepository userRepository,
-                         CommentRepository commentRepository) {
+                         CommentRepository commentRepository,
+                         @org.springframework.context.annotation.Lazy LocationIndexService locationIndexService) {
         this.reviewRepository = reviewRepository;
         this.locationRepository = locationRepository;
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
+        this.locationIndexService = locationIndexService;
     }
 
     @Transactional
@@ -150,6 +153,13 @@ public class ReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("Location not found"));
         location.setTotalRating(avg);
         locationRepository.save(location);
+
+        try {
+            locationIndexService.updateIndex(locationId);
+        } catch (Exception e) {
+            logger.warn("Failed to sync ES index after rating update for location id={}: {}", locationId, e.getMessage());
+        }
+
         logger.debug("Updated totalRating for location id={}: {}", locationId, avg);
     }
 

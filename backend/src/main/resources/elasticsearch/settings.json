@@ -1,0 +1,51 @@
+{
+  "analysis": {
+    "char_filter": {
+      "cyrillic_to_latin": {
+        "type": "mapping",
+        "mappings": [
+          "а => a", "б => b", "в => v", "г => g", "д => d", "ђ => đ", "е => e",
+          "ж => ž", "з => z", "и => i", "ј => j", "к => k", "л => l", "љ => lj",
+          "м => m", "н => n", "њ => nj", "о => o", "п => p", "р => r", "с => s",
+          "т => t", "ћ => ć", "у => u", "ф => f", "х => h", "ц => c", "ч => č",
+          "џ => dž", "ш => š",
+          "А => a", "Б => b", "В => v", "Г => g", "Д => d", "Ђ => đ", "Е => e",
+          "Ж => ž", "З => z", "И => i", "Ј => j", "К => k", "Л => l", "Љ => lj",
+          "М => m", "Н => n", "Њ => nj", "О => o", "П => p", "Р => r", "С => s",
+          "Т => t", "Ћ => ć", "У => u", "Ф => f", "Х => h", "Ц => c", "Ч => č",
+          "Џ => dž", "Ш => š"
+        ]
+      }
+    },
+    "filter": {
+      "serbian_stop": {
+        "type": "stop",
+        "stopwords": ["i", "a", "ali", "pa", "ni", "niti", "ili", "da", "ne", "je",
+          "su", "se", "u", "na", "za", "sa", "od", "do", "iz", "po", "o", "ka",
+          "pri", "pre", "preko", "kroz", "oko", "između", "ispod", "iznad",
+          "taj", "ta", "to", "ovo", "ono", "ovaj", "ona", "on", "oni", "one",
+          "koji", "koja", "koje", "što", "šta", "ko", "čiji", "čija",
+          "bio", "bila", "bilo", "bili", "biti", "sam", "si", "smo", "ste",
+          "imam", "ima", "imaju", "može", "mogu", "treba", "već", "još",
+          "ako", "kad", "kada", "dok", "jer", "zato", "kao", "tako",
+          "sve", "svi", "svaki", "svaka", "svako", "neki", "neka", "neko",
+          "više", "manje", "vrlo", "veoma", "samo", "baš", "tek"]
+      }
+    },
+    "analyzer": {
+      "serbian_custom_analyzer": {
+        "type": "custom",
+        "char_filter": ["cyrillic_to_latin"],
+        "tokenizer": "standard",
+        "filter": ["lowercase", "serbian_stop"]
+      }
+    },
+    "normalizer": {
+      "lowercase_normalizer": {
+        "type": "custom",
+        "char_filter": ["cyrillic_to_latin"],
+        "filter": ["lowercase"]
+      }
+    }
+  }
+}

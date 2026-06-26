@@ -8,6 +8,7 @@ import com.ues.repository.LocationRepository;
 import com.ues.util.MinioUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,12 +23,15 @@ public class LocationService {
     private final LocationRepository locationRepository;
     private final ImageRepository imageRepository;
     private final MinioUtil minioUtil;
+    private final LocationIndexService locationIndexService;
 
     public LocationService(LocationRepository locationRepository,
                            ImageRepository imageRepository,
-                           MinioUtil minioUtil) {
+                           MinioUtil minioUtil,
+                           @Lazy LocationIndexService locationIndexService) {
         this.locationRepository = locationRepository;
         this.imageRepository = imageRepository;
+        this.locationIndexService = locationIndexService;
         this.minioUtil = minioUtil;
     }
 
@@ -49,6 +53,12 @@ public class LocationService {
 
         Location saved = locationRepository.save(location);
         logger.info("Created location: {} (id={})", name, saved.getId());
+
+        try {
+            locationIndexService.indexLocation(saved);
+        } catch (Exception e) {
+            logger.warn("Failed to index new location in ES: {}", e.getMessage());
+        }
 
         return toDto(saved);
     }
@@ -94,6 +104,13 @@ public class LocationService {
 
         Location saved = locationRepository.save(location);
         logger.info("Updated location id={}", id);
+
+        try {
+            locationIndexService.updateIndex(id);
+        } catch (Exception e) {
+            logger.warn("Failed to update ES index for location id={}: {}", id, e.getMessage());
+        }
+
         return toDto(saved);
     }
 
@@ -123,6 +140,13 @@ public class LocationService {
         }
 
         locationRepository.delete(location);
+
+        try {
+            locationIndexService.deleteIndex(id);
+        } catch (Exception e) {
+            logger.warn("Failed to delete ES index for location id={}: {}", id, e.getMessage());
+        }
+
         logger.info("Deleted location id={}", id);
     }
 

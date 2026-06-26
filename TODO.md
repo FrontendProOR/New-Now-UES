@@ -142,11 +142,11 @@
 ---
 
 ## Faza 11: UES – Elasticsearch indeksiranje i MinIO PDF
-- [ ] **11.1** Kreirati `model/LocationIndex.java` (Spring Data Elasticsearch dokument) sa svim poljima.
-- [ ] **11.2** Kreirati `repository/LocationSearchRepository.java` (extends ElasticsearchRepository).
-- [ ] **11.3** Kreirati `config/ElasticsearchConfig.java` sa custom analyzer-om (ćirilica→latinica, lowercase, stop reči).
-- [ ] **11.4** Implementirati sinhronizaciju: pri svakoj promeni mesta (kreiranje, izmena, brisanje recenzije) ažurirati ili indeksirati `LocationIndex`.
-- [ ] **11.5** Implementirati PDF upload za mesto (MinIO):
+- [x] **11.1** Kreirati `model/LocationIndex.java` (Spring Data Elasticsearch dokument) sa svim poljima.
+- [x] **11.2** Kreirati `repository/LocationSearchRepository.java` (extends ElasticsearchRepository).
+- [x] **11.3** Kreirati `config/ElasticsearchConfig.java` sa custom analyzer-om (ćirilica→latinica, lowercase, stop reči).
+- [x] **11.4** Implementirati sinhronizaciju: pri svakoj promeni mesta (kreiranje, izmena, brisanje recenzije) ažurirati ili indeksirati `LocationIndex`.
+- [x] **11.5** Implementirati PDF upload za mesto (MinIO):
   - Dodati endpoint `POST /api/admin/locations/{id}/pdf` (samo admin)
   - Parsirati PDF (Apache PDFBox) i izvući tekst.
   - Sačuvati PDF u MinIO, kreirati `DescriptionDocument`, upisati tekst u `LocationIndex.fileDescription`.
