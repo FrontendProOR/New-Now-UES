@@ -154,15 +154,15 @@
 ---
 
 ## Faza 12: UES – Napredna pretraga (S1)
-- [ ] **12.1** Kreirati `controller/SearchController.java` sa endpointom:
+- [x] **12.1** Kreirati `controller/SearchController.java` sa endpointom:
   - `GET /api/search/locations` sa svim parametrima (naziv, opis, pdf, reviewCount opseg, ocene opsezi, boolean operator, specijalni upiti, more like this).
-- [ ] **12.2** Implementirati logiku pretrage:
+- [x] **12.2** Implementirati logiku pretrage:
   - Detekcija `"..."` (phrase), `*` (prefix), `~` (fuzzy).
   - Kombinovanje `BoolQueryBuilder` sa AND/OR.
   - Dodavanje `MoreLikeThisQuery` na osnovu `name`, `description`, `fileDescription`.
   - Highlight na `name` i `description`.
-- [ ] **12.3** Sortiranje po nazivu (koristiti `name.sort` keyword).
-- [ ] **12.4** Dodati endpoint `GET /api/search/locations/{id}/pdf` za preuzimanje PDF-a iz MinIO.
+- [x] **12.3** Sortiranje po nazivu (koristiti `name.sort` keyword).
+- [x] **12.4** Dodati endpoint `GET /api/search/locations/{id}/pdf` za preuzimanje PDF-a iz MinIO.
 
 ---
 
