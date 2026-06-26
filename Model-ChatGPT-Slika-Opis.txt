@@ -1,0 +1,2356 @@
+# Tekstualna specifikacija modela podataka
+
+Ovaj odeljak predstavlja preciznu tekstualnu transkripciju UML/draw.io modela iz fajla `UES-Novi-Sad-Model-drawio.png`, dopunjenu objašnjenjima značenja klasa, atributa, enumeracija, nasleđivanja, asocijacija, kardinalnosti i vidljivosti članova.
+
+Model je usklađen sa opisom iz projektne specifikacije, prema kojoj entitet `User` predstavlja registrovanog korisnika, `Administrator` administratora sistema, `Manages` vezu između korisnika i mesta kojim upravlja, `Location` mesto, `Event` događaj, `Review` utisak, `Rate` ocene, a `Comment` komentar ili odgovor na utisak. 
+
+---
+
+## 1. UML notacija korišćena u dijagramu
+
+### 1.1. Vidljivost atributa
+
+Svi atributi u dijagramu imaju prefiks:
+
+```text
++
+```
+
+U UML notaciji znak `+` označava **javnu, odnosno `public` vidljivost**.
+
+Primer:
+
+```text
++ email: String
+```
+
+znači:
+
+```java
+public String email;
+```
+
+Međutim, prilikom implementacije JPA entiteta nije preporučljivo bukvalno praviti javna polja. U Java/Spring aplikaciji treba koristiti privatna polja uz javne getere i setere:
+
+```java
+private String email;
+
+public String getEmail() {
+    return email;
+}
+
+public void setEmail(String email) {
+    this.email = email;
+}
+```
+
+Dakle:
+
+* UML model formalno prikazuje `public` atribute;
+* implementacija može i treba da koristi `private` polja;
+* javni pristup se ostvaruje preko metoda;
+* promena tehničke vidljivosti polja ne menja semantički model baze.
+
+### 1.2. Tipovi podataka
+
+U dijagramu se koriste sledeći tipovi:
+
+| Tip u modelu    | Značenje                                                                         |
+| --------------- | -------------------------------------------------------------------------------- |
+| `String`        | Tekstualna vrednost                                                              |
+| `Integer`       | Ceo broj                                                                         |
+| `Double`        | Decimalni broj dvostruke preciznosti                                             |
+| `Float`         | Decimalni broj jednostruke preciznosti                                           |
+| `Boolean`       | Logička vrednost `true/false`                                                    |
+| `LocalDate`     | Datum bez vremena                                                                |
+| `LocalDateTime` | Datum i vreme                                                                    |
+| `Text`          | Elasticsearch tekstualno polje koje se analizira i koristi za full-text pretragu |
+| `RequestStatus` | Enumeracija statusa zahteva za registraciju                                      |
+
+### 1.3. Kardinalnosti
+
+Dijagram koristi sledeće kardinalnosti:
+
+| Kardinalnost | Značenje                                                                |
+| ------------ | ----------------------------------------------------------------------- |
+| `1..1`       | Tačno jedna povezana instanca; veza je obavezna                         |
+| `0..1`       | Nijedna ili jedna instanca; veza je opciona                             |
+| `0..*`       | Nula ili proizvoljan broj instanci                                      |
+| `0...1`      | U dijagramu se pojavljuje sa tri tačke; semantički se tumači kao `0..1` |
+
+---
+
+# 2. Pregled klasa i struktura
+
+Model sadrži sledeće klase i enumeracije:
+
+1. `AccountRequest`
+2. `RequestStatus`
+3. `User`
+4. `Administrator`
+5. `Manages`
+6. `Location`
+7. `Event`
+8. `Review`
+9. `Rate`
+10. `Comment`
+11. `Image`
+12. `DescriptionDocument` — nije nacrtan kao zasebna klasa, ali dijagram eksplicitno zahteva da bude napravljen po uzoru na `Image`
+13. `LocationIndex`
+
+---
+
+# 3. Klasa `AccountRequest`
+
+## 3.1. Namena
+
+Klasa `AccountRequest` predstavlja zahtev neregistrovanog korisnika za registraciju u sistem.
+
+Pre nego što korisnik postane aktivan `User`, administrator mora da obradi njegov zahtev i da ga prihvati ili odbije.
+
+## 3.2. Atributi
+
+```text
+AccountRequest
++ email: String
++ password: String
++ address: String
++ status: RequestStatus
++ createdAt: LocalDate
++ rejectionReason: String
+```
+
+### `email: String`
+
+Adresa elektronske pošte osobe koja podnosi zahtev.
+
+Predstavlja:
+
+* kontakt-adresu korisnika;
+* budući identifikator za prijavu;
+* podatak preko kojeg se proverava da li zahtev ili korisnik već postoji.
+
+Preporučena pravila:
+
+* obavezno polje;
+* mora biti validan format e-mail adrese;
+* trebalo bi da bude jedinstveno među aktivnim zahtevima i registrovanim korisnicima;
+* poređenje treba vršiti bez obzira na velika i mala slova;
+* preporučljivo je sačuvati adresu u normalizovanom obliku, npr. malim slovima.
+
+### `password: String`
+
+Lozinka koju je podnosilac uneo prilikom registracije.
+
+Važno:
+
+* lozinka se ne sme čuvati kao čist tekst;
+* mora se sačuvati kao bezbedan hash, na primer BCrypt;
+* naziv atributa u modelu ostaje `password`, ali vrednost u bazi predstavlja hash;
+* potrebno je validirati minimalnu dužinu i eventualna pravila složenosti.
+
+### `address: String`
+
+Adresa podnosioca zahteva za registraciju.
+
+Prema dijagramu, zahtev sadrži samo jedno adresno tekstualno polje, bez posebnog polja za grad.
+
+### `status: RequestStatus`
+
+Status obrade zahteva.
+
+Dozvoljene vrednosti definisane su enumeracijom `RequestStatus`:
+
+* `PENDING`
+* `ACCEPTED`
+* `REJECTED`
+
+### `createdAt: LocalDate`
+
+Datum kreiranja zahteva.
+
+Pošto je tip `LocalDate`, model čuva samo datum, bez tačnog vremena.
+
+Preporučeno ponašanje:
+
+* automatski se postavlja pri kreiranju zahteva;
+* korisnik ne treba ručno da unosi ovu vrednost;
+* vrednost se ne menja nakon kreiranja.
+
+### `rejectionReason: String`
+
+Razlog odbijanja zahteva.
+
+Semantički je opcion:
+
+* kod statusa `PENDING` treba da bude `null`;
+* kod statusa `ACCEPTED` treba da bude `null`;
+* kod statusa `REJECTED` može ili treba da sadrži obrazloženje administratora.
+
+Dijagram ne navodi posebnu kardinalnost atributa, ali poslovna pravila impliciraju da nije obavezan za svaki zahtev.
+
+## 3.3. Poslovna pravila
+
+1. Novi zahtev se kreira sa statusom `PENDING`.
+2. Samo administrator može promeniti status u `ACCEPTED` ili `REJECTED`.
+3. Status se ne sme proizvoljno vraćati iz obrađenog stanja u `PENDING`.
+4. Pri prihvatanju zahteva kreira se odgovarajući `User`.
+5. Pri odbijanju se može sačuvati `rejectionReason`.
+6. Nakon obrade zahteva korisniku se šalje e-mail.
+7. Korisnik se može prijaviti tek nakon prihvatanja zahteva.
+
+---
+
+# 4. Enumeracija `RequestStatus`
+
+## 4.1. Definicija
+
+```text
+<<Enum>>
+RequestStatus
+
++ PENDING: EnumConstant
++ ACCEPTED: EnumConstant
++ REJECTED: EnumConstant
+```
+
+## 4.2. Vrednosti
+
+### `PENDING`
+
+Zahtev je kreiran, ali još nije obrađen.
+
+### `ACCEPTED`
+
+Administrator je prihvatio zahtev.
+
+Nakon prihvatanja:
+
+* treba kreirati ili aktivirati korisnički nalog;
+* korisniku treba omogućiti prijavu;
+* korisniku treba poslati obaveštenje e-mailom.
+
+### `REJECTED`
+
+Administrator je odbio zahtev.
+
+Kod ovog statusa može postojati razlog odbijanja u atributu `rejectionReason`.
+
+## 4.3. Predložena Java implementacija
+
+```java
+public enum RequestStatus {
+    PENDING,
+    ACCEPTED,
+    REJECTED
+}
+```
+
+---
+
+# 5. Klasa `User`
+
+## 5.1. Namena
+
+Klasa `User` predstavlja registrovanog korisnika aplikacije.
+
+Koristi se za:
+
+* autentifikaciju;
+* autorizaciju;
+* čuvanje profilnih podataka;
+* povezivanje sa utiscima;
+* povezivanje sa komentarima;
+* povezivanje sa mestima kojima korisnik upravlja.
+
+## 5.2. Atributi
+
+```text
+User
++ email: String
++ password: String
++ name: String
++ createdAt: LocalDate
++ phoneNumber: String
++ birthday: LocalDate
++ address: String
++ city: String
+```
+
+### `email: String`
+
+E-mail registrovanog korisnika.
+
+Predstavlja korisničko ime za prijavu.
+
+Preporučena pravila:
+
+* obavezno;
+* jedinstveno;
+* validan format e-mail adrese;
+* normalizovano na mala slova;
+* ne sme postojati više korisnika sa istim e-mailom.
+
+### `password: String`
+
+Hash lozinke korisnika.
+
+Ne sme se:
+
+* vraćati kroz javni DTO;
+* beležiti u log;
+* slati klijentu;
+* čuvati kao čist tekst.
+
+### `name: String`
+
+Ime korisnika.
+
+Dijagram ne odvaja ime i prezime, pa se celokupno ime čuva u jednom tekstualnom polju.
+
+### `createdAt: LocalDate`
+
+Datum kreiranja korisničkog naloga.
+
+Automatski se postavlja prilikom prihvatanja zahteva ili kreiranja naloga.
+
+### `phoneNumber: String`
+
+Broj telefona korisnika.
+
+Koristi se `String`, a ne numerički tip, zato što broj telefona može sadržati:
+
+* znak `+`;
+* razmake;
+* crtice;
+* vodeće nule;
+* pozivni broj države.
+
+### `birthday: LocalDate`
+
+Datum rođenja korisnika.
+
+Ne sadrži vreme.
+
+### `address: String`
+
+Adresa stanovanja korisnika.
+
+### `city: String`
+
+Grad korisnika.
+
+## 5.3. Odnosi klase `User`
+
+`User` je povezan sa:
+
+* `Administrator` kroz nasleđivanje;
+* `Review` kao autor utiska;
+* `Comment` kao autor komentara;
+* `Manages` kao korisnik koji upravlja mestima.
+
+---
+
+# 6. Klasa `Administrator`
+
+## 6.1. Definicija
+
+```text
+Administrator
+```
+
+Klasa nema sopstvene atribute prikazane na dijagramu.
+
+## 6.2. Nasleđivanje
+
+Dijagram prikazuje:
+
+```text
+Administrator extends User
+```
+
+To znači da je `Administrator` specijalizovani tip klase `User`.
+
+Administrator nasleđuje sva polja korisnika:
+
+```text
+email
+password
+name
+createdAt
+phoneNumber
+birthday
+address
+city
+```
+
+## 6.3. UML značenje linije
+
+Linija od `Administrator` prema `User` završava se praznim trouglom na strani klase `User`.
+
+To je UML generalizacija i znači:
+
+* `Administrator` je podklasa;
+* `User` je nadklasa;
+* svaki administrator jeste korisnik;
+* nije svaki korisnik administrator.
+
+## 6.4. Poslovna uloga
+
+Administrator može:
+
+* obrađivati zahteve za registraciju;
+* prihvatiti ili odbiti zahtev;
+* kreirati, menjati i uklanjati mesta;
+* dodeljivati korisnike kao menadžere mesta;
+* uklanjati menadžere sa mesta;
+* koristiti sve funkcionalnosti običnog korisnika i menadžera.
+
+---
+
+# 7. Klasa `Manages`
+
+## 7.1. Namena
+
+`Manages` je asocijativna klasa koja predstavlja vezu između:
+
+* jednog korisnika;
+* jednog mesta.
+
+Njome se modeluje podatak da određeni korisnik upravlja određenim mestom u određenom periodu.
+
+Ne treba je tretirati samo kao običnu many-to-many pomoćnu tabelu jer sadrži sopstvene atribute:
+
+```text
+startDate
+endDate
+```
+
+## 7.2. Atributi
+
+```text
+Manages
++ startDate: LocalDate
++ endDate: LocalDate
+```
+
+### `startDate: LocalDate`
+
+Datum od kada korisnik upravlja mestom.
+
+Preporučeno:
+
+* obavezno polje;
+* automatski postavljeno prilikom dodeljivanja menadžera;
+* ne sme biti posle `endDate`.
+
+### `endDate: LocalDate`
+
+Datum do kada je korisnik upravljao mestom.
+
+Semantički treba da bude opcion:
+
+* `null` znači da korisnik trenutno upravlja mestom;
+* popunjena vrednost znači da je upravljanje završeno.
+
+## 7.3. Veza `User — Manages`
+
+Na dijagramu je prikazana kardinalnost:
+
+```text
+User 1..1 ← Manages 0..*
+```
+
+Tumačenje:
+
+* svaki zapis `Manages` pripada tačno jednom korisniku;
+* jedan korisnik može imati nula ili više zapisa `Manages`;
+* korisnik može upravljati većim brojem mesta;
+* korisnik može imati istorijske zapise upravljanja.
+
+Formalno:
+
+```text
+Manages.user: User [1..1]
+User.managementAssignments: Manages [0..*]
+```
+
+Predložena JPA interpretacija:
+
+```java
+@ManyToOne(optional = false)
+private User user;
+```
+
+u klasi `Manages`, odnosno:
+
+```java
+@OneToMany(mappedBy = "user")
+private Set<Manages> managementAssignments;
+```
+
+u klasi `User`.
+
+## 7.4. Veza `Location — Manages`
+
+Na dijagramu je prikazana kardinalnost:
+
+```text
+Location 1..1 ← Manages 0..*
+```
+
+Tumačenje:
+
+* svaki zapis `Manages` pripada tačno jednom mestu;
+* jedno mesto može imati nula ili više zapisa `Manages`;
+* mesto može imati više trenutnih ili istorijskih menadžera;
+* istorija menadžera se može sačuvati korišćenjem `startDate` i `endDate`.
+
+Formalno:
+
+```text
+Manages.location: Location [1..1]
+Location.managementAssignments: Manages [0..*]
+```
+
+## 7.5. Efektivni menadžer
+
+Aktivnim menadžerom mesta treba smatrati zapis za koji važi:
+
+```text
+startDate <= današnji datum
+```
+
+i:
+
+```text
+endDate == null
+```
+
+ili:
+
+```text
+endDate >= današnji datum
+```
+
+## 7.6. Važno ograničenje
+
+Kombinacija korisnika, mesta i aktivnog perioda ne sme proizvesti duplu aktivnu dodelu.
+
+Drugim rečima, ne treba dozvoliti dva istovremeno aktivna `Manages` zapisa za istog korisnika i isto mesto.
+
+---
+
+# 8. Klasa `Location`
+
+## 8.1. Namena
+
+`Location` predstavlja mesto ili objekat u Novom Sadu na kojem se održavaju događaji.
+
+Primeri:
+
+* klub;
+* pozorište;
+* koncertna dvorana;
+* galerija;
+* kulturna stanica;
+* bioskop;
+* restoran;
+* otvoreni prostor.
+
+## 8.2. Atributi
+
+```text
+Location
++ name: String
++ description: String
++ createdAt: LocalDate
++ address: String
++ totalRating: Double
++ type: String
+```
+
+### `name: String`
+
+Naziv mesta.
+
+Prema projektnoj specifikaciji ovo je obavezno polje. 
+
+### `description: String`
+
+Tekstualni opis mesta unet kroz korisnički interfejs.
+
+Ovo nije sadržaj PDF dokumenta.
+
+Treba razlikovati:
+
+* `Location.description` — opis iz relacione baze, unet kroz formu;
+* `LocationIndex.fileDescription` — parsirani tekst iz PDF dokumenta.
+
+### `createdAt: LocalDate`
+
+Datum kreiranja mesta u sistemu.
+
+### `address: String`
+
+Adresa mesta.
+
+Obavezno polje prema projektnoj specifikaciji. 
+
+### `totalRating: Double`
+
+Ukupna ili prosečna ocena mesta.
+
+Naziv atributa je `totalRating`, ali prema funkcionalnim zahtevima pored naziva mesta treba prikazati srednju vrednost ocene. Zato ovaj atribut treba precizno definisati kao agregiranu ocenu mesta.
+
+Moguće tumačenje:
+
+```text
+totalRating = prosečna vrednost svih važećih pojedinačnih ocena
+```
+
+Pri računanju:
+
+* logički uklonjeni utisci se ne računaju;
+* sakriveni utisci se i dalje računaju;
+* `null` kategorije se ne uključuju u prosek;
+* vrednost treba ažurirati kada se doda, izmeni ili ukloni ocena.
+
+### `type: String`
+
+Tip mesta.
+
+Dijagram koristi `String`, a ne enumeraciju.
+
+Primeri vrednosti:
+
+```text
+CLUB
+THEATRE
+CINEMA
+GALLERY
+RESTAURANT
+CULTURAL_CENTER
+OPEN_AIR
+OTHER
+```
+
+Pošto model eksplicitno navodi `String`, ne treba samovoljno menjati model u posebnu tabelu ili enum bez dozvole nastavnika. Može se koristiti kontrolisana lista vrednosti na aplikativnom nivou, dok tip baze ostaje tekstualan.
+
+## 8.3. Odnosi klase `Location`
+
+`Location` je povezan sa:
+
+* `Event`;
+* `Review`;
+* `Manages`;
+* `Image`;
+* budućim `DescriptionDocument`;
+* `LocationIndex` na logičkom nivou indeksiranja.
+
+---
+
+# 9. Klasa `Event`
+
+## 9.1. Namena
+
+`Event` predstavlja događaj koji se održava na određenom mestu.
+
+## 9.2. Atributi
+
+```text
+Event
++ name: String
++ address: String
++ type: String
++ date: LocalDate
++ price: Double
++ recurrent: Boolean
+```
+
+### `name: String`
+
+Naziv događaja.
+
+Obavezno polje.
+
+### `address: String`
+
+Adresa događaja.
+
+Iako događaj pripada mestu koje već ima adresu, model eksplicitno sadrži i adresu događaja.
+
+To omogućava:
+
+* čuvanje adrese kakva je važila u trenutku događaja;
+* održavanje događaja na posebnoj lokaciji;
+* prikaz adrese bez oslanjanja isključivo na trenutno stanje mesta.
+
+### `type: String`
+
+Tip događaja.
+
+Primeri:
+
+```text
+CONCERT
+THEATRE
+EXHIBITION
+FESTIVAL
+WORKSHOP
+LECTURE
+PARTY
+SPORT
+OTHER
+```
+
+Dijagram nalaže `String`.
+
+### `date: LocalDate`
+
+Datum održavanja događaja.
+
+Dijagram ne sadrži vreme početka ili završetka.
+
+To znači da prema datom modelu postoji samo kalendarski datum.
+
+### `price: Double`
+
+Cena ulaska.
+
+Kod besplatnog događaja treba jasno definisati konvenciju.
+
+Pošto model nema posebno polje `free`, najprirodnije je:
+
+```text
+price = 0.0
+```
+
+da znači besplatan događaj.
+
+`null` ne treba koristiti kao sinonim za besplatan događaj osim ako se to izričito ne propiše, jer bi `null` mogao značiti da cena nije poznata.
+
+### `recurrent: Boolean`
+
+Označava da li je događaj redovan.
+
+* `true` — događaj je redovan;
+* `false` — događaj je jednokratan ili neredovan.
+
+Prema zahtevima, korisnik može ostaviti utisak samo za redovan događaj koji se već održao.
+
+## 9.3. Veza `Event — Location`
+
+Dijagram označava vezu nazivom:
+
+```text
+at
+```
+
+Kardinalnosti su:
+
+```text
+Event 0..* — Location 1..1
+```
+
+Tumačenje:
+
+* svaki događaj se održava na tačno jednom mestu;
+* jedno mesto može imati nula ili više događaja;
+* događaj bez mesta nije dozvoljen;
+* mesto može postojati i bez događaja.
+
+Formalno:
+
+```text
+Event.location: Location [1..1]
+Location.events: Event [0..*]
+```
+
+Predložena JPA veza:
+
+```java
+@ManyToOne(optional = false)
+private Location location;
+```
+
+i:
+
+```java
+@OneToMany(mappedBy = "location")
+private Set<Event> events;
+```
+
+---
+
+# 10. Klasa `Review`
+
+## 10.1. Namena
+
+`Review` predstavlja utisak koji registrovani korisnik ostavlja za mesto, u kontekstu događaja koji se održao na tom mestu.
+
+## 10.2. Atributi
+
+```text
+Review
++ createdAt: LocalDateTime
++ eventCount: Integer
++ hidden: Boolean
+```
+
+### `createdAt: LocalDateTime`
+
+Datum i vreme nastanka utiska.
+
+Za razliku od većine `createdAt` atributa u dijagramu, ovde se koristi `LocalDateTime`, pa se čuva i tačno vreme objavljivanja.
+
+Ovo je važno za:
+
+* sortiranje utisaka;
+* prikaz najskorijih utisaka;
+* audit;
+* proveru da li se događaj već održao u trenutku ostavljanja utiska.
+
+### `eventCount: Integer`
+
+Broj koliko se puta izabrani događaj ukupno održao do trenutka pisanja recenzije.
+
+Ovo je istorijski snapshot.
+
+Vrednost se postavlja pri kreiranju utiska i ne treba naknadno automatski menjati kada se događaj ponovo održi.
+
+Primer:
+
+* događaj se do datuma recenzije održao 5 puta;
+* `eventCount = 5`;
+* kasnije se održi još 10 puta;
+* na staroj recenziji i dalje ostaje `5`.
+
+### `hidden: Boolean`
+
+Označava da li je utisak sakriven.
+
+* `false` — utisak je javno vidljiv;
+* `true` — utisak nije prikazan običnim korisnicima.
+
+Važno je razlikovati:
+
+* sakriven utisak;
+* logički uklonjen utisak.
+
+Prema zahtevima, sakrivena recenzija i dalje učestvuje u ukupnoj oceni, dok uklonjena recenzija ne učestvuje. Dijagram sadrži samo `hidden`, a ne sadrži `deleted`, `active` ili `removedAt`. Zbog toga logičko brisanje mora biti rešeno dodatnim tehničkim mehanizmom koji nije prikazan na modelu, ali se model ne sme samovoljno menjati bez usaglašavanja.
+
+Moguće implementacije:
+
+* JPA/Hibernate soft-delete mehanizam;
+* posebna tehnička kolona ako je dozvoljena;
+* posebna tabela evidencije brisanja;
+* status koji se dodaje samo uz saglasnost nastavnika.
+
+## 10.3. Veza `Review — User`
+
+Naziv veze:
+
+```text
+made by
+```
+
+Kardinalnosti:
+
+```text
+Review 0..* — User 1..1
+```
+
+Tumačenje:
+
+* svaki utisak je napravio tačno jedan korisnik;
+* jedan korisnik može napraviti nula ili više utisaka;
+* utisak bez autora nije dozvoljen.
+
+Formalno:
+
+```text
+Review.author: User [1..1]
+User.reviews: Review [0..*]
+```
+
+## 10.4. Veza `Review — Location`
+
+Naziv veze:
+
+```text
+for a
+```
+
+Kardinalnosti:
+
+```text
+Review 0..* — Location 1..1
+```
+
+Tumačenje:
+
+* svaki utisak se odnosi na tačno jedno mesto;
+* jedno mesto može imati nula ili više utisaka;
+* utisak bez mesta nije dozvoljen.
+
+Formalno:
+
+```text
+Review.location: Location [1..1]
+Location.reviews: Review [0..*]
+```
+
+## 10.5. Veza `Review — Event`
+
+Naziv veze:
+
+```text
+belongs to
+```
+
+Kardinalnosti:
+
+```text
+Review 0..* — Event 1..1
+```
+
+Tumačenje:
+
+* svaki utisak mora biti povezan sa tačno jednim događajem;
+* jedan događaj može imati nula ili više utisaka;
+* događaj iz utiska mora pripadati istom mestu kao i sam utisak.
+
+Formalno:
+
+```text
+Review.event: Event [1..1]
+Event.reviews: Review [0..*]
+```
+
+### Obavezno konzistentno ograničenje
+
+Za svaki utisak mora važiti:
+
+```text
+review.event.location == review.location
+```
+
+Ne sme biti moguće odabrati događaj sa jednog mesta i napisati recenziju za drugo mesto.
+
+## 10.6. Veza `Review — Comment`
+
+Naziv veze:
+
+```text
+left a
+```
+
+Kardinalnosti:
+
+```text
+Review 0..* — Comment 0..1
+```
+
+Bukvalno čitanje dijagrama znači:
+
+* jedan `Review` može imati nula ili jedan direktno povezani `Comment`;
+* jedan `Comment` može biti povezan sa više `Review` objekata prema oznaci `0..*` na strani recenzije.
+
+Međutim, drugo tumačenje nije logički u skladu sa domenom. Smisleno domensko tumačenje je:
+
+* recenzija može imati najviše jedan početni komentar;
+* komentar pripada jednoj recenziji;
+* dalji odgovori se modeluju samoreferencirajućom vezom `Comment → Comment`.
+
+Zbog toga implementacija treba da prati namenu zahteva, ali bez samovoljne promene dijagrama. Najbezbednija interpretacija je:
+
+```text
+Review.rootComment: Comment [0..1]
+Comment.review: Review [1..1]
+```
+
+uz stablo odgovora kroz `Comment.parent`.
+
+## 10.7. Veza `Review — Rate`
+
+Naziv veze:
+
+```text
+with rating
+```
+
+Kardinalnosti:
+
+```text
+Review 0..* — Rate 1..1
+```
+
+Bukvalno po oznakama dijagrama:
+
+* svaki `Review` ima tačno jedan `Rate`;
+* jedan `Rate` bi mogao biti povezan sa više recenzija.
+
+Domen, međutim, jasno ukazuje da je `Rate` vrednosni deo pojedinačne recenzije i da treba da pripada samo jednoj recenziji.
+
+Praktična interpretacija treba da bude:
+
+```text
+Review.rate: Rate [1..1]
+Rate.review: Review [1..1]
+```
+
+ili, ako se dozvoli recenzija bez ijedne ocene:
+
+```text
+Review.rate: Rate [0..1]
+```
+
+Ali slika eksplicitno prikazuje `1..1` uz `Rate`, pa je najvernija implementacija da svaki `Review` ima jedan `Rate` objekat, pri čemu pojedinačne ocene unutar njega mogu biti `null`.
+
+---
+
+# 11. Klasa `Rate`
+
+## 11.1. Namena
+
+`Rate` predstavlja strukturisane ocene mesta date kroz recenziju.
+
+## 11.2. Atributi
+
+```text
+Rate
++ performance: Integer
++ soundAndLighting: Integer
++ venue: Integer
++ overallImpression: Integer
+```
+
+### `performance: Integer`
+
+Ocena nastupa.
+
+Dozvoljen opseg:
+
+```text
+1–10
+```
+
+Pošto nije obavezno oceniti svaku stavku, polje mora dozvoliti `null`.
+
+### `soundAndLighting: Integer`
+
+Kombinovana ocena zvuka i svetla.
+
+Dozvoljen opseg:
+
+```text
+1–10
+```
+
+Polje je opciono.
+
+### `venue: Integer`
+
+Ocena prostora ili samog mesta.
+
+Dozvoljen opseg:
+
+```text
+1–10
+```
+
+Polje je opciono.
+
+### `overallImpression: Integer`
+
+Ocena ukupnog utiska.
+
+Dozvoljen opseg:
+
+```text
+1–10
+```
+
+Polje je opciono.
+
+## 11.3. Validacija
+
+Za svako neprazno polje mora važiti:
+
+```text
+1 <= ocena <= 10
+```
+
+Primer Bean Validation anotacije:
+
+```java
+@Min(1)
+@Max(10)
+private Integer performance;
+```
+
+Treba koristiti `Integer`, a ne `int`, zato što ocena može biti izostavljena, odnosno `null`.
+
+## 11.4. Odnos sa Elasticsearch prosečnim ocenama
+
+Ocene iz `Rate` objekata agregiraju se u `LocationIndex`.
+
+Mapiranje je:
+
+| `Rate` atribut      | `LocationIndex` atribut                            |
+| ------------------- | -------------------------------------------------- |
+| `performance`       | `avgPerformanceGrade`                              |
+| `soundAndLighting`  | doprinosi `avgSoundGrade` i/ili `avgLightingGrade` |
+| `venue`             | `avgSpaceGrade`                                    |
+| `overallImpression` | `avgExperienceGrade`                               |
+
+Ovde postoji važna nedoslednost modela:
+
+* relacioni model ima jedno polje `soundAndLighting`;
+* Elasticsearch indeks ima odvojena polja `avgSoundGrade` i `avgLightingGrade`.
+
+Specifikacija projekta govori o odvojenim kategorijama zvuka i svetla u delu UES pretrage, dok osnovni model koristi kombinovanu ocenu. Zato je potrebno precizno odlučiti kako se vrednost mapira.
+
+Najvernije rešenje bez izmene relacionog modela jeste:
+
+```text
+avgSoundGrade = prosek Rate.soundAndLighting
+avgLightingGrade = prosek Rate.soundAndLighting
+```
+
+To jeste dupliranje iste agregirane vrednosti u dva indeksna polja, ali čuva zadati model.
+
+---
+
+# 12. Klasa `Comment`
+
+## 12.1. Namena
+
+`Comment` predstavlja tekstualni komentar ostavljen uz utisak ili odgovor na drugi komentar.
+
+Model podržava:
+
+* početni komentar uz utisak;
+* odgovor menadžera;
+* odgovor korisnika na odgovor menadžera;
+* proizvoljno dubok niz odgovora.
+
+## 12.2. Atributi
+
+```text
+Comment
++ text: String
++ createdAt: LocalDateTime
+```
+
+### `text: String`
+
+Sadržaj komentara.
+
+Preporučena pravila:
+
+* ne sme biti prazan;
+* treba ukloniti ili odbiti sadržaj koji sadrži samo razmake;
+* treba postaviti maksimalnu dužinu;
+* izlaz na frontendu mora biti escapovan radi zaštite od XSS napada.
+
+### `createdAt: LocalDateTime`
+
+Datum i vreme kreiranja komentara.
+
+Automatski se postavlja na serveru.
+
+## 12.3. Veza `Comment — User`
+
+Naziv veze:
+
+```text
+belongs to
+```
+
+Dijagram pokazuje da komentar pripada korisniku.
+
+Iako uz liniju nisu jasno prikazane obe kardinalnosti, domensko i grafičko značenje veze jeste:
+
+* svaki komentar ima jednog autora;
+* jedan korisnik može napisati više komentara.
+
+Formalno:
+
+```text
+Comment.author: User [1..1]
+User.comments: Comment [0..*]
+```
+
+## 12.4. Samoreferencirajuća veza `Comment — Comment`
+
+Naziv veze:
+
+```text
+replies to
+```
+
+Uz vezu je prikazana kardinalnost:
+
+```text
+0...1
+```
+
+što treba čitati kao:
+
+```text
+0..1
+```
+
+Tumačenje:
+
+* komentar može odgovoriti na najviše jedan roditeljski komentar;
+* korenski komentar nema roditelja;
+* odgovor ima jednog roditelja;
+* jedan komentar može imati proizvoljan broj odgovora, iako druga kardinalnost nije jasno ispisana na petlji.
+
+Formalni model:
+
+```text
+Comment.parent: Comment [0..1]
+Comment.replies: Comment [0..*]
+```
+
+Ovo omogućava proizvoljnu dubinu:
+
+```text
+Comment
+└── Reply
+    └── Reply
+        └── Reply
+            └── ...
+```
+
+## 12.5. Pravila za komentare
+
+1. Početni komentar može ostaviti korisnik uz recenziju.
+2. Menadžer mesta može odgovoriti na recenziju ili komentar.
+3. Korisnik može odgovoriti na komentar menadžera.
+4. Svaki odgovor mora pripadati istoj diskusiji i istoj recenziji kao roditeljski komentar.
+5. Ne sme se dozvoliti ciklus:
+
+   * komentar ne može biti sam sebi roditelj;
+   * komentar ne može odgovoriti na svog potomka.
+6. Brisanje roditeljskog komentara ne sme nekontrolisano izbrisati celu diskusiju osim ako je to eksplicitno poslovno pravilo.
+
+---
+
+# 13. Klasa `Image`
+
+## 13.1. Definicija
+
+```text
+Image
+(Napravite ovakvu klasu i za DescriptionDocument entitet)
+
+serverFilename: String
+```
+
+Napomena u samom dijagramu nalaže da se napravi analogna klasa za `DescriptionDocument`.
+
+## 13.2. Atribut
+
+### `serverFilename: String`
+
+Naziv fajla pod kojim je slika sačuvana na serveru, odnosno u MinIO skladištu.
+
+Važno je da se razlikuju:
+
+* originalni naziv fajla koji je korisnik poslao;
+* serverski naziv ili object key koji sistem generiše;
+* javni ili privremeni URL za preuzimanje.
+
+Dijagram sadrži samo:
+
+```text
+serverFilename
+```
+
+pa se taj atribut treba koristiti kao referenca ka objektu u MinIO.
+
+Primer vrednosti:
+
+```text
+locations/42/images/550e8400-e29b-41d4-a716-446655440000.jpg
+```
+
+## 13.3. Veza `Image — Event`
+
+Kardinalnosti na dijagramu:
+
+```text
+Image 0..1 — Event 1..1
+```
+
+Tumačenje:
+
+* događaj ima tačno jednu sliku;
+* slika može pripadati nuli ili jednom događaju;
+* slika se ne deli između više događaja.
+
+Formalno:
+
+```text
+Event.image: Image [1..1]
+Image.event: Event [0..1]
+```
+
+Ovo odgovara zahtevu da događaj mora sadržati jednu sliku. 
+
+## 13.4. Veza `Image — Location`
+
+Naziv veze:
+
+```text
+belongs to
+```
+
+Kardinalnosti:
+
+```text
+Image 0..1 — Location 1..1
+```
+
+Tumačenje:
+
+* mesto ima tačno jednu sliku;
+* slika može pripadati nuli ili jednom mestu;
+* ista slika ne treba da se deli između više mesta.
+
+Formalno:
+
+```text
+Location.image: Image [1..1]
+Image.location: Location [0..1]
+```
+
+Ovo odgovara zahtevu da mesto mora sadržati sliku. 
+
+## 13.5. Ekskluzivna pripadnost
+
+Pošto isti tip `Image` može biti povezan i sa `Location` i sa `Event`, mora postojati ograničenje da jedna slika ne pripada istovremeno i mestu i događaju.
+
+Validne varijante:
+
+```text
+image.location != null AND image.event == null
+```
+
+ili:
+
+```text
+image.location == null AND image.event != null
+```
+
+Nevalidno:
+
+```text
+image.location != null AND image.event != null
+```
+
+---
+
+# 14. Klasa `DescriptionDocument`
+
+## 14.1. Status u dijagramu
+
+`DescriptionDocument` nije grafički prikazan kao zasebna klasa, ali je u zaglavlju klase `Image` eksplicitno napisano:
+
+```text
+Napravite ovakvu klasu i za DescriptionDocument entitet
+```
+
+Zbog toga specifikacija mora sadržati ovaj entitet.
+
+## 14.2. Predložena struktura prema dijagramu
+
+Najvernija struktura je:
+
+```text
+DescriptionDocument
++ serverFilename: String
+```
+
+Njegova uloga je da čuva referencu na PDF dokument u MinIO.
+
+## 14.3. Veza sa `Location`
+
+Pošto projektni zahtev nalaže da se PDF opis dodaje za mesto, veza treba da bude:
+
+```text
+Location 1..1 — DescriptionDocument 0..1
+```
+
+Semantički:
+
+* jedno mesto može imati najviše jedan PDF opis;
+* jedan dokument pripada najviše jednom mestu;
+* PDF nije obavezan za svako mesto, osim ako se posebno ne propiše.
+
+Formalno:
+
+```text
+Location.descriptionDocument: DescriptionDocument [0..1]
+DescriptionDocument.location: Location [0..1 ili 1..1]
+```
+
+## 14.4. MinIO sadržaj
+
+U MinIO se čuva originalni PDF fajl.
+
+U relacionoj bazi se čuva:
+
+```text
+serverFilename
+```
+
+odnosno object key.
+
+Sadržaj PDF-a se:
+
+1. preuzima ili čita pri uploadu;
+2. parsira;
+3. pretvara u tekst;
+4. upisuje u Elasticsearch polje `LocationIndex.fileDescription`.
+
+---
+
+# 15. Klasa `LocationIndex`
+
+## 15.1. Namena
+
+`LocationIndex` nije standardni JPA entitet, već Elasticsearch indeksni dokument.
+
+Služi za:
+
+* full-text pretragu mesta;
+* pretragu sadržaja PDF dokumenta;
+* pretragu po broju recenzija;
+* pretragu po prosečnim ocenama;
+* sortiranje i highlight rezultata.
+
+## 15.2. Atributi
+
+```text
+LocationIndex
++ name: Text
++ description: Text
++ fileDescription: Text
++ reviewCount: Integer
++ avgPerformanceGrade: Float
++ avgSoundGrade: Float
++ avgLightingGrade: Float
++ avgSpaceGrade: Float
++ avgExperienceGrade: Float
+```
+
+### `name: Text`
+
+Naziv mesta u Elasticsearch-u.
+
+Koristi se za full-text pretragu po nazivu.
+
+Pošto je potrebno i sortiranje po nazivu, u stvarnoj indeksnoj strukturi treba imati dodatno `keyword` podpolje, na primer:
+
+```json
+"name": {
+  "type": "text",
+  "analyzer": "serbian_custom_analyzer",
+  "fields": {
+    "sort": {
+      "type": "keyword",
+      "normalizer": "lowercase_normalizer"
+    }
+  }
+}
+```
+
+Pretraga se vrši nad:
+
+```text
+name
+```
+
+a sortiranje nad:
+
+```text
+name.sort
+```
+
+### `description: Text`
+
+Opis mesta koji je unet kroz korisnički interfejs.
+
+Ovo je sadržaj iz:
+
+```text
+Location.description
+```
+
+Koristi se za full-text pretragu i dinamički sažetak.
+
+### `fileDescription: Text`
+
+Parsiran tekst iz priloženog PDF dokumenta.
+
+Ne predstavlja naziv fajla, već puni tekst izdvojen iz PDF-a.
+
+Koristi se za:
+
+* full-text pretragu;
+* phrase query;
+* prefix query;
+* fuzzy query;
+* more-like-this pretragu;
+* highlight.
+
+### `reviewCount: Integer`
+
+Ukupan broj recenzija mesta koje se računaju kao važeće.
+
+Treba jasno definisati:
+
+* uklonjeni utisci se ne računaju;
+* sakriveni utisci se računaju;
+* broj se ažurira nakon dodavanja ili logičkog uklanjanja recenzije.
+
+### `avgPerformanceGrade: Float`
+
+Prosečna ocena nastupa.
+
+Izvor:
+
+```text
+Rate.performance
+```
+
+Računaju se samo neprazne ocene iz važećih recenzija.
+
+### `avgSoundGrade: Float`
+
+Prosečna ocena zvuka.
+
+Pošto relacioni model sadrži `soundAndLighting`, ova vrednost se izvodi iz tog atributa, osim ako se model uz odobrenje nastavnika proširi.
+
+### `avgLightingGrade: Float`
+
+Prosečna ocena svetla.
+
+U postojećem modelu izvodi se iz `soundAndLighting`.
+
+### `avgSpaceGrade: Float`
+
+Prosečna ocena prostora.
+
+Izvor:
+
+```text
+Rate.venue
+```
+
+### `avgExperienceGrade: Float`
+
+Prosečna ocena ukupnog utiska.
+
+Izvor:
+
+```text
+Rate.overallImpression
+```
+
+## 15.3. Veza sa `Location`
+
+Dijagram ne prikazuje eksplicitnu liniju između `Location` i `LocationIndex`, ali veza postoji na logičkom nivou.
+
+Za svako mesto treba da postoji najviše jedan Elasticsearch dokument.
+
+Preporučeno je da Elasticsearch dokument koristi isti identifikator kao `Location` u relacionoj bazi:
+
+```text
+LocationIndex.id = Location.id
+```
+
+Time se omogućava:
+
+* jednostavna sinhronizacija;
+* ažuriranje indeksa;
+* brisanje dokumenta;
+* povezivanje rezultata pretrage sa relacionim entitetom.
+
+Napomena: atribut `id` nije nacrtan u dijagramu, ali Elasticsearch dokument mora imati dokument ID na infrastrukturnom nivou.
+
+---
+
+# 16. Kompletna lista asocijacija
+
+## 16.1. Nasleđivanje administratora
+
+```text
+Administrator extends User
+```
+
+Značenje:
+
+* administrator je korisnik;
+* nasleđuje sva korisnička polja;
+* dobija dodatne privilegije kroz autorizaciju.
+
+---
+
+## 16.2. Korisnik i dodela upravljanja
+
+```text
+User 1..1 ← Manages 0..*
+```
+
+Značenje:
+
+* svaki `Manages` zapis pripada jednom korisniku;
+* korisnik može imati više dodela upravljanja.
+
+---
+
+## 16.3. Mesto i dodela upravljanja
+
+```text
+Location 1..1 ← Manages 0..*
+```
+
+Značenje:
+
+* svaki `Manages` zapis pripada jednom mestu;
+* mesto može imati više trenutnih ili istorijskih menadžera.
+
+---
+
+## 16.4. Mesto i događaj
+
+```text
+Location 1..1 ← Event 0..*
+```
+
+Naziv veze:
+
+```text
+at
+```
+
+Značenje:
+
+* događaj se održava na tačno jednom mestu;
+* mesto ima nula ili više događaja.
+
+---
+
+## 16.5. Korisnik i utisak
+
+```text
+User 1..1 ← Review 0..*
+```
+
+Naziv veze:
+
+```text
+made by
+```
+
+Značenje:
+
+* utisak je napravio jedan korisnik;
+* korisnik može napraviti više utisaka.
+
+---
+
+## 16.6. Mesto i utisak
+
+```text
+Location 1..1 ← Review 0..*
+```
+
+Naziv veze:
+
+```text
+for a
+```
+
+Značenje:
+
+* utisak se odnosi na jedno mesto;
+* mesto može imati više utisaka.
+
+---
+
+## 16.7. Događaj i utisak
+
+```text
+Event 1..1 ← Review 0..*
+```
+
+Naziv veze:
+
+```text
+belongs to
+```
+
+Značenje:
+
+* svaki utisak se odnosi na jedan događaj;
+* događaj može imati više utisaka.
+
+---
+
+## 16.8. Utisak i ocene
+
+```text
+Review — Rate
+```
+
+Naziv veze:
+
+```text
+with rating
+```
+
+Praktično domensko značenje:
+
+* recenzija ima jedan skup ocena;
+* skup ocena pripada jednoj recenziji;
+* pojedinačne kategorije mogu biti prazne.
+
+---
+
+## 16.9. Utisak i komentar
+
+```text
+Review — Comment
+```
+
+Naziv veze:
+
+```text
+left a
+```
+
+Praktično značenje:
+
+* recenzija može imati početni komentar;
+* komentar je deo diskusije jedne recenzije.
+
+---
+
+## 16.10. Korisnik i komentar
+
+```text
+User 1..1 ← Comment 0..*
+```
+
+Naziv veze:
+
+```text
+belongs to
+```
+
+Značenje:
+
+* komentar ima jednog autora;
+* korisnik može napisati više komentara.
+
+---
+
+## 16.11. Komentar i roditeljski komentar
+
+```text
+Comment.parent: Comment [0..1]
+Comment.replies: Comment [0..*]
+```
+
+Naziv veze:
+
+```text
+replies to
+```
+
+Značenje:
+
+* komentar može biti odgovor na jedan drugi komentar;
+* komentar može imati više odgovora;
+* podržana je proizvoljna dubina diskusije.
+
+---
+
+## 16.12. Mesto i slika
+
+```text
+Location 1..1 — Image 0..1
+```
+
+Naziv veze:
+
+```text
+belongs to
+```
+
+Značenje:
+
+* mesto mora imati jednu sliku;
+* slika pripada najviše jednom mestu.
+
+---
+
+## 16.13. Događaj i slika
+
+```text
+Event 1..1 — Image 0..1
+```
+
+Značenje:
+
+* događaj mora imati jednu sliku;
+* slika pripada najviše jednom događaju.
+
+---
+
+## 16.14. Mesto i PDF dokument
+
+Implicitna veza izvedena iz napomene u dijagramu:
+
+```text
+Location 1..1 — DescriptionDocument 0..1
+```
+
+Značenje:
+
+* mesto može imati opcion PDF opis;
+* dokument pripada jednom mestu;
+* fajl se čuva u MinIO;
+* parsirani sadržaj se indeksira u Elasticsearch.
+
+---
+
+# 17. Tekstualni pseudo-UML model
+
+```text
+enum RequestStatus {
+    PENDING,
+    ACCEPTED,
+    REJECTED
+}
+
+class AccountRequest {
+    + email: String
+    + password: String
+    + address: String
+    + status: RequestStatus
+    + createdAt: LocalDate
+    + rejectionReason: String
+}
+
+class User {
+    + email: String
+    + password: String
+    + name: String
+    + createdAt: LocalDate
+    + phoneNumber: String
+    + birthday: LocalDate
+    + address: String
+    + city: String
+}
+
+class Administrator extends User {
+}
+
+class Manages {
+    + startDate: LocalDate
+    + endDate: LocalDate
+
+    user: User [1..1]
+    location: Location [1..1]
+}
+
+class Location {
+    + name: String
+    + description: String
+    + createdAt: LocalDate
+    + address: String
+    + totalRating: Double
+    + type: String
+
+    events: Event [0..*]
+    reviews: Review [0..*]
+    managementAssignments: Manages [0..*]
+    image: Image [1..1]
+    descriptionDocument: DescriptionDocument [0..1]
+}
+
+class Event {
+    + name: String
+    + address: String
+    + type: String
+    + date: LocalDate
+    + price: Double
+    + recurrent: Boolean
+
+    location: Location [1..1]
+    image: Image [1..1]
+    reviews: Review [0..*]
+}
+
+class Review {
+    + createdAt: LocalDateTime
+    + eventCount: Integer
+    + hidden: Boolean
+
+    author: User [1..1]
+    location: Location [1..1]
+    event: Event [1..1]
+    rate: Rate [1..1]
+    rootComment: Comment [0..1]
+}
+
+class Rate {
+    + performance: Integer
+    + soundAndLighting: Integer
+    + venue: Integer
+    + overallImpression: Integer
+}
+
+class Comment {
+    + text: String
+    + createdAt: LocalDateTime
+
+    author: User [1..1]
+    review: Review [1..1]
+    parent: Comment [0..1]
+    replies: Comment [0..*]
+}
+
+class Image {
+    + serverFilename: String
+
+    location: Location [0..1]
+    event: Event [0..1]
+}
+
+class DescriptionDocument {
+    + serverFilename: String
+
+    location: Location [1..1]
+}
+
+class LocationIndex {
+    + name: Text
+    + description: Text
+    + fileDescription: Text
+    + reviewCount: Integer
+    + avgPerformanceGrade: Float
+    + avgSoundGrade: Float
+    + avgLightingGrade: Float
+    + avgSpaceGrade: Float
+    + avgExperienceGrade: Float
+}
+```
+
+---
+
+# 18. Pravila integriteta izvedena iz modela
+
+## 18.1. Registracija
+
+```text
+AccountRequest.status je inicijalno PENDING.
+```
+
+```text
+AccountRequest.email mora biti jedinstven u kontekstu neobrađenih zahteva.
+```
+
+```text
+Pri ACCEPTED statusu kreira se User.
+```
+
+```text
+Pri REJECTED statusu može postojati rejectionReason.
+```
+
+---
+
+## 18.2. Korisnik
+
+```text
+User.email mora biti jedinstven.
+```
+
+```text
+User.password mora biti hashovan.
+```
+
+```text
+Administrator mora istovremeno biti validan User.
+```
+
+---
+
+## 18.3. Upravljanje mestom
+
+```text
+Manages.user ne sme biti null.
+```
+
+```text
+Manages.location ne sme biti null.
+```
+
+```text
+Manages.startDate ne sme biti null.
+```
+
+```text
+Ako endDate postoji, endDate >= startDate.
+```
+
+```text
+Aktivna dodela se određuje na osnovu startDate i endDate.
+```
+
+---
+
+## 18.4. Događaj
+
+```text
+Event.location ne sme biti null.
+```
+
+```text
+Event.image ne sme biti null.
+```
+
+```text
+Event.price >= 0.
+```
+
+```text
+Event.price == 0 označava besplatan događaj.
+```
+
+---
+
+## 18.5. Utisak
+
+Utisak se može ostaviti samo ako:
+
+```text
+review.event.recurrent == true
+```
+
+i:
+
+```text
+review.event.date < trenutni datum
+```
+
+ili, ako se dozvoljava recenzija kasnije istog dana:
+
+```text
+review.event.date <= trenutni datum
+```
+
+Dalje mora važiti:
+
+```text
+review.event.location == review.location
+```
+
+```text
+review.author != null
+```
+
+```text
+review.location != null
+```
+
+```text
+review.event != null
+```
+
+```text
+review.rate != null
+```
+
+---
+
+## 18.6. Ocene
+
+Za svako neprazno polje:
+
+```text
+1 <= grade <= 10
+```
+
+Prazna kategorija se ne uključuje u prosek te kategorije.
+
+---
+
+## 18.7. Sakrivanje i uklanjanje recenzija
+
+Sakrivena recenzija:
+
+```text
+hidden == true
+```
+
+* ne prikazuje se običnom korisniku;
+* i dalje doprinosi ukupnoj oceni;
+* i dalje doprinosi Elasticsearch prosečnim ocenama.
+
+Logički uklonjena recenzija:
+
+* ne prikazuje se;
+* ne doprinosi ukupnoj oceni;
+* ne doprinosi `reviewCount`;
+* ne doprinosi Elasticsearch prosečnim ocenama.
+
+---
+
+## 18.8. Komentari
+
+```text
+Comment.author ne sme biti null.
+```
+
+```text
+Comment.text ne sme biti prazan.
+```
+
+```text
+Comment.parent može biti null.
+```
+
+```text
+Comment.parent ne sme biti isti objekat kao Comment.
+```
+
+```text
+Svi odgovori u stablu moraju pripadati istoj recenziji.
+```
+
+---
+
+## 18.9. Slike
+
+```text
+Location mora imati tačno jednu sliku.
+```
+
+```text
+Event mora imati tačno jednu sliku.
+```
+
+```text
+Image.serverFilename mora pokazivati na postojeći MinIO objekat.
+```
+
+```text
+Jedan Image ne sme istovremeno pripadati i Location i Event objektu.
+```
+
+---
+
+## 18.10. Dokument opisa
+
+```text
+DescriptionDocument mora predstavljati PDF fajl.
+```
+
+```text
+DescriptionDocument.serverFilename mora pokazivati na MinIO objekat.
+```
+
+```text
+Parsiran tekst PDF-a upisuje se u LocationIndex.fileDescription.
+```
+
+---
+
+# 19. Sinhronizacija relacione baze, MinIO-a i Elasticsearch-a
+
+## 19.1. Kreiranje mesta
+
+Pri kreiranju mesta:
+
+1. validirati podatke;
+2. sačuvati `Location` u relacionu bazu;
+3. sačuvati sliku u MinIO;
+4. sačuvati `Image.serverFilename`;
+5. opciono sačuvati PDF u MinIO;
+6. parsirati PDF;
+7. formirati `LocationIndex`;
+8. indeksirati dokument u Elasticsearch.
+
+## 19.2. Izmena mesta
+
+Pri izmeni:
+
+* `name` ažurira `LocationIndex.name`;
+* `description` ažurira `LocationIndex.description`;
+* novi PDF ažurira `fileDescription`;
+* promena slike ažurira MinIO referencu, ali ne mora menjati ES dokument;
+* stare MinIO objekte treba ukloniti tek nakon uspešnog čuvanja novih.
+
+## 19.3. Dodavanje ili uklanjanje recenzije
+
+Nakon promene recenzija potrebno je ponovo izračunati:
+
+```text
+Location.totalRating
+LocationIndex.reviewCount
+LocationIndex.avgPerformanceGrade
+LocationIndex.avgSoundGrade
+LocationIndex.avgLightingGrade
+LocationIndex.avgSpaceGrade
+LocationIndex.avgExperienceGrade
+```
+
+## 19.4. Transakciona konzistentnost
+
+Pošto MySQL/PostgreSQL, MinIO i Elasticsearch ne dele jednu ACID transakciju, potrebno je predvideti:
+
+* retry mehanizam;
+* kompenzacionu operaciju;
+* asinhrono indeksiranje;
+* outbox obrazac;
+* periodični reconciliation posao.
+
+Za studentski projekat, najmanje je potrebno:
+
+* jasno obraditi grešku;
+* ne ostaviti lažnu referencu u bazi;
+* logovati neuspešnu sinhronizaciju;
+* omogućiti ponovno indeksiranje mesta.
+
+---
+
+# 20. Bitne nedoslednosti i tačke koje ne treba prećutati
+
+## 20.1. `soundAndLighting` naspram odvojenih ES polja
+
+Relacioni model:
+
+```text
+soundAndLighting
+```
+
+Elasticsearch model:
+
+```text
+avgSoundGrade
+avgLightingGrade
+```
+
+Ovo nije potpuno jedan-na-jedan mapiranje.
+
+Bez izmene modela, obe ES vrednosti treba izvesti iz istog relacionog polja.
+
+## 20.2. Kardinalnost `Review — Rate`
+
+Dijagram grafički sugeriše kardinalnosti koje bi mogle značiti da jedan `Rate` pripada više recenzija, što nema smisla u domenu.
+
+Implementacija treba da tretira `Rate` kao jednu ocenu jedne recenzije.
+
+## 20.3. Kardinalnost `Review — Comment`
+
+Dijagram sugeriše da recenzija ima najviše jedan direktni komentar, dok funkcionalni zahtev traži proizvoljan broj odgovora.
+
+To se rešava:
+
+* jednim korenskim komentarom ili početnim komentarom;
+* samoreferencirajućim odgovorima `Comment.parent`;
+* ili vezom svih komentara prema recenziji u implementaciji.
+
+## 20.4. Logičko brisanje recenzije
+
+Zahtev traži logičko brisanje, ali `Review` nema atribut:
+
+```text
+deleted
+removed
+active
+deletedAt
+```
+
+To mora biti rešeno tehnički, ali bez neodobrene izmene zvaničnog modela.
+
+## 20.5. Nedostatak identifikatora
+
+Dijagram ne prikazuje primarne ključeve ni za jednu klasu.
+
+U implementaciji svaki perzistentni entitet mora imati tehnički identifikator, na primer:
+
+```java
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+```
+
+Ovo je infrastrukturna potreba JPA baze, iako nije nacrtana u domenskom dijagramu.
+
+Za `LocationIndex` treba koristiti identifikator odgovarajućeg `Location` entiteta.
+
+## 20.6. Nema metoda u klasama
+
+Dijagram sadrži samo atribute i veze.
+
+Ne sadrži metode poput:
+
+```text
+calculateRating()
+hideReview()
+acceptRequest()
+assignManager()
+```
+
+Zato metode servisa ne treba predstavljati kao deo originalnog modela, već kao aplikacionu logiku izvedenu iz zahteva.
+
+---
+
+# 21. Preporučene tehničke reprezentacije veza
+
+| Veza                             | Predložena JPA reprezentacija                                            |
+| -------------------------------- | ------------------------------------------------------------------------ |
+| `Administrator → User`           | `@Inheritance` ili uloga/autoritet, zavisno od tačne strategije          |
+| `Manages → User`                 | `@ManyToOne`                                                             |
+| `Manages → Location`             | `@ManyToOne`                                                             |
+| `Event → Location`               | `@ManyToOne`                                                             |
+| `Review → User`                  | `@ManyToOne`                                                             |
+| `Review → Location`              | `@ManyToOne`                                                             |
+| `Review → Event`                 | `@ManyToOne`                                                             |
+| `Review → Rate`                  | `@OneToOne`, moguće cascade/all + orphan removal                         |
+| `Review → Comment`               | `@OneToMany` ili korenski `@OneToOne`, zavisno od konačne interpretacije |
+| `Comment → User`                 | `@ManyToOne`                                                             |
+| `Comment → parent Comment`       | `@ManyToOne`                                                             |
+| `Comment → replies`              | `@OneToMany(mappedBy = "parent")`                                        |
+| `Location → Image`               | `@OneToOne`                                                              |
+| `Event → Image`                  | `@OneToOne`                                                              |
+| `Location → DescriptionDocument` | `@OneToOne`                                                              |
+| `LocationIndex`                  | `@Document(indexName = "locations")`                                     |
+
+---
+
+# 22. Konačna sažeta definicija domena
+
+Sistem sadrži zahteve za registraciju, korisnike, administratore, mesta, događaje, menadžerske dodele, recenzije, ocene, komentare, slike, PDF dokumente i Elasticsearch indeks mesta.
+
+Neregistrovana osoba šalje `AccountRequest`. Administrator obrađuje zahtev. Pri prihvatanju nastaje `User`. `Administrator` je specijalizovani `User`. Korisnik može biti dodeljen mestu kroz `Manages`, koji čuva početni i krajnji datum upravljanja.
+
+`Location` predstavlja mesto i ima naziv, opis, datum kreiranja, adresu, ukupnu ocenu i tip. Mesto ima jednu sliku, opcion PDF dokument, više događaja, više recenzija i više zapisa o menadžerima.
+
+`Event` pripada jednom mestu, ima naziv, adresu, tip, datum, cenu, oznaku redovnosti i jednu sliku.
+
+`Review` ostavlja jedan korisnik za jedno mesto i jedan događaj. Sadrži vreme nastanka, broj prethodnih održavanja događaja, status sakrivenosti, ocene i opcioni komentar. `Rate` sadrži ocene nastupa, zvuka i svetla, prostora i ukupnog utiska. `Comment` sadrži tekst, vreme nastanka, autora i opcionu vezu prema roditeljskom komentaru, čime se omogućava proizvoljan broj ugnježdenih odgovora.
+
+Slike i PDF dokumenti čuvaju se u MinIO-u, dok relaciona baza čuva njihov `serverFilename`. Podaci potrebni za naprednu pretragu mesta denormalizuju se u `LocationIndex`, koji sadrži naziv, opis, sadržaj PDF-a, broj recenzija i prosečne ocene po kategorijama.
