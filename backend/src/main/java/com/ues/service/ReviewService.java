@@ -116,6 +116,28 @@ public class ReviewService {
                 .toList();
     }
 
+    @Transactional
+    public ReviewDto hideReview(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("Review not found"));
+        review.setHidden(true);
+        Review saved = reviewRepository.save(review);
+        logger.info("Review id={} hidden", reviewId);
+        return toDto(saved);
+    }
+
+    @Transactional
+    public void deleteReview(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("Review not found"));
+        review.setDeleted(true);
+        reviewRepository.save(review);
+
+        updateLocationRating(review.getLocation().getId());
+        logger.info("Review id={} logically deleted, totalRating recalculated for location id={}",
+                reviewId, review.getLocation().getId());
+    }
+
     public List<ReviewDto> getReviewsByUser(Long userId) {
         return reviewRepository.findByAuthorId(userId).stream()
                 .map(this::toDto)

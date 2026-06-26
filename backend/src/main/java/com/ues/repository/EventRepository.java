@@ -38,4 +38,10 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                              @Param("maxPrice") Double maxPrice,
                              @Param("dateFrom") LocalDate dateFrom,
                              @Param("dateTo") LocalDate dateTo);
+
+    @Query("SELECT e FROM Event e WHERE e.location.id = :locationId " +
+           "AND e.date >= :dateFrom AND e.date <= :dateTo")
+    List<Event> findByLocationIdAndDateBetween(@Param("locationId") Long locationId,
+                                               @Param("dateFrom") LocalDate dateFrom,
+                                               @Param("dateTo") LocalDate dateTo);
 }

@@ -122,12 +122,12 @@
 ---
 
 ## Faza 9: Menadžerske funkcije (sakrivanje, brisanje recenzija, analitika)
-- [ ] **9.1** Kreirati `controller/ManagerReviewController.java`:
+- [x] **9.1** Kreirati `controller/ManagerReviewController.java`:
   - `GET /api/manager/locations/{locationId}/reviews` (sve recenzije)
   - `PUT /api/manager/reviews/{id}/hide` (postavi hidden=true)
   - `DELETE /api/manager/reviews/{id}` (logičko brisanje – ne računa se ocena)
-- [ ] **9.2** Pri brisanju recenzije, ažurirati `Location.totalRating` i ukloniti iz ES indeksa (kasnije).
-- [ ] **9.3** Kreirati `controller/ManagerAnalyticsController.java`:
+- [x] **9.2** Pri brisanju recenzije, ažurirati `Location.totalRating` i ukloniti iz ES indeksa (kasnije).
+- [x] **9.3** Kreirati `controller/ManagerAnalyticsController.java`:
   - `GET /api/manager/locations/{locationId}/analytics` sa parametrima: period (nedeljni, mesečni, godišnji, proizvoljni opseg)
   - Vratiti: ukupan broj događaja, podelu na redovne/neredovne, besplatne/plaćene, top liste događaja i mesta po prosečnim ocenama, 3 najskorija utiska sa najpopularnijeg mesta.
 
