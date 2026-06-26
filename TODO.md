@@ -23,18 +23,18 @@
 ---
 
 ## Faza 1: Model podataka (JPA entiteti)
-- [ ] **1.1** Kreirati `model/AccountRequest.java` (sa enum `RequestStatus`).
-- [ ] **1.2** Kreirati `model/User.java` (osnovni korisnik).
-- [ ] **1.3** Kreirati `model/Administrator.java` (extends User, bez dodatnih polja).
-- [ ] **1.4** Kreirati `model/Location.java` (sa vezama ka Image, DescriptionDocument, Event, Review, Manages).
-- [ ] **1.5** Kreirati `model/Event.java` (sa vezom ka Location i Image).
-- [ ] **1.6** Kreirati `model/Review.java` (sa vezama ka User, Location, Event, Rate, Comment).
-- [ ] **1.7** Kreirati `model/Rate.java` (ocene).
-- [ ] **1.8** Kreirati `model/Comment.java` (sa samoreferencirajućom vezom).
-- [ ] **1.9** Kreirati `model/Image.java`.
-- [ ] **1.10** Kreirati `model/DescriptionDocument.java`.
-- [ ] **1.11** Kreirati `model/Manages.java` (veza User-Location sa datumima).
-- [ ] **1.12** Kreirati JPA repozitorijume za sve entitete (`repository/` paket).
+- [x] **1.1** Kreirati `model/AccountRequest.java` (sa enum `RequestStatus`).
+- [x] **1.2** Kreirati `model/User.java` (osnovni korisnik).
+- [x] **1.3** Kreirati `model/Administrator.java` (extends User, bez dodatnih polja).
+- [x] **1.4** Kreirati `model/Location.java` (sa vezama ka Image, DescriptionDocument, Event, Review, Manages).
+- [x] **1.5** Kreirati `model/Event.java` (sa vezom ka Location i Image).
+- [x] **1.6** Kreirati `model/Review.java` (sa vezama ka User, Location, Event, Rate, Comment).
+- [x] **1.7** Kreirati `model/Rate.java` (ocene).
+- [x] **1.8** Kreirati `model/Comment.java` (sa samoreferencirajućom vezom).
+- [x] **1.9** Kreirati `model/Image.java`.
+- [x] **1.10** Kreirati `model/DescriptionDocument.java`.
+- [x] **1.11** Kreirati `model/Manages.java` (veza User-Location sa datumima).
+- [x] **1.12** Kreirati JPA repozitorijume za sve entitete (`repository/` paket).
 
 ---
 
