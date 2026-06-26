@@ -90,11 +90,11 @@
 ---
 
 ## Faza 6: Komentari (Comment) i odgovori
-- [ ] **6.1** Kreirati `controller/CommentController.java`:
+- [x] **6.1** Kreirati `controller/CommentController.java`:
   - `POST /api/reviews/{reviewId}/comments` – koreni komentar (od korisnika)
   - `POST /api/comments/{commentId}/replies` – odgovor (menadžer ili korisnik)
-- [ ] **6.2** Implementirati logiku: menadžer može odgovoriti na bilo koji komentar; običan korisnik samo na komentar menadžera (proveriti).
-- [ ] **6.3** Omogućiti prikaz stabla komentara.
+- [x] **6.2** Implementirati logiku: menadžer može odgovoriti na bilo koji komentar; običan korisnik samo na komentar menadžera (proveriti).
+- [x] **6.3** Omogućiti prikaz stabla komentara.
 
 ---
 
