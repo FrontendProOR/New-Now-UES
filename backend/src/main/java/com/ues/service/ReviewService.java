@@ -109,6 +109,13 @@ public class ReviewService {
                 .toList();
     }
 
+    public List<ReviewDto> getLatestReviewsForLocation(Long locationId, int count) {
+        return reviewRepository.findTop3ByLocationIdAndDeletedFalseOrderByCreatedAtDesc(locationId).stream()
+                .limit(count)
+                .map(this::toDto)
+                .toList();
+    }
+
     public List<ReviewDto> getReviewsByUser(Long userId) {
         return reviewRepository.findByAuthorId(userId).stream()
                 .map(this::toDto)

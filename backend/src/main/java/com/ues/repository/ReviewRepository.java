@@ -33,4 +33,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
            "AND (r.rate.performance IS NOT NULL OR r.rate.soundAndLighting IS NOT NULL " +
            "OR r.rate.venue IS NOT NULL OR r.rate.overallImpression IS NOT NULL)")
     Double calculateAverageRating(@Param("locationId") Long locationId);
+
+    List<Review> findTop3ByLocationIdAndDeletedFalseOrderByCreatedAtDesc(Long locationId);
 }

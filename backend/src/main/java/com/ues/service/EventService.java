@@ -155,6 +155,15 @@ public class EventService {
                 .toList();
     }
 
+    public List<EventDto> searchEvents(String type, Long locationId, String address,
+                                        Double minPrice, Double maxPrice,
+                                        LocalDate dateFrom, LocalDate dateTo) {
+        return eventRepository.searchEvents(type, locationId, address, minPrice, maxPrice, dateFrom, dateTo)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
     private EventDto toDto(Event event) {
         EventDto dto = new EventDto();
         dto.setId(event.getId());

@@ -99,12 +99,12 @@
 ---
 
 ## Faza 7: Pretraga i filtriranje (SQL)
-- [ ] **7.1** Kreirati `controller/LocationController.java` (javni, ali za prijavljene):
+- [x] **7.1** Kreirati `controller/LocationController.java` (javni, ali za prijavljene):
   - `GET /api/locations` sa parametrima: naziv, adresa, tip (pretraga po LIKE).
-- [ ] **7.2** Kreirati `controller/EventController.java`:
+- [x] **7.2** Kreirati `controller/EventController.java`:
   - `GET /api/events` sa parametrima: tip, mesto (ID), adresa, cena (min/max), datum (od-do).
   - `GET /api/events/today` – današnji događaji.
-- [ ] **7.3** Kreirati `controller/HomeController.java`:
+- [x] **7.3** Kreirati `controller/HomeController.java`:
   - `GET /api/home/popular-locations` (top 5 po oceni)
   - `GET /api/home/latest-reviews` (3 najskorija sa najpopularnijeg mesta)
 

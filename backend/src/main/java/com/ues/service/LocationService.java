@@ -138,6 +138,12 @@ public class LocationService {
                 .toList();
     }
 
+    public List<LocationDto> searchLocations(String name, String address, String type) {
+        return locationRepository.searchLocations(name, address, type).stream()
+                .map(this::toDto)
+                .toList();
+    }
+
     public List<LocationDto> getTopLocations(int count) {
         return locationRepository.findTop5ByOrderByTotalRatingDesc().stream()
                 .limit(count)

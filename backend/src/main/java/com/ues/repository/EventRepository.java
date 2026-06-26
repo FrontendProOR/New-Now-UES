@@ -22,4 +22,20 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                               @Param("type") String type,
                               @Param("locationId") Long locationId,
                               @Param("beforeDate") LocalDate beforeDate);
+
+    @Query("SELECT e FROM Event e WHERE " +
+           "(:type IS NULL OR LOWER(e.type) LIKE LOWER(CONCAT('%', :type, '%'))) AND " +
+           "(:locationId IS NULL OR e.location.id = :locationId) AND " +
+           "(:address IS NULL OR LOWER(e.address) LIKE LOWER(CONCAT('%', :address, '%'))) AND " +
+           "(:minPrice IS NULL OR e.price >= :minPrice) AND " +
+           "(:maxPrice IS NULL OR e.price <= :maxPrice) AND " +
+           "(:dateFrom IS NULL OR e.date >= :dateFrom) AND " +
+           "(:dateTo IS NULL OR e.date <= :dateTo)")
+    List<Event> searchEvents(@Param("type") String type,
+                             @Param("locationId") Long locationId,
+                             @Param("address") String address,
+                             @Param("minPrice") Double minPrice,
+                             @Param("maxPrice") Double maxPrice,
+                             @Param("dateFrom") LocalDate dateFrom,
+                             @Param("dateTo") LocalDate dateTo);
 }

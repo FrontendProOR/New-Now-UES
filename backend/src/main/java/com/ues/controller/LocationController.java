@@ -22,7 +22,14 @@ public class LocationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<LocationDto>> getAllLocations() {
+    public ResponseEntity<List<LocationDto>> getLocations(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String address,
+            @RequestParam(required = false) String type) {
+        if (name != null || address != null || type != null) {
+            logger.debug("Searching locations: name={}, address={}, type={}", name, address, type);
+            return ResponseEntity.ok(locationService.searchLocations(name, address, type));
+        }
         logger.debug("Fetching all locations");
         return ResponseEntity.ok(locationService.getAllLocations());
     }
