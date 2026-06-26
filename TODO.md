@@ -39,18 +39,18 @@
 ---
 
 ## Faza 2: Autentifikacija i autorizacija
-- [ ] **2.1** Implementirati `UserDetailsService` (kroz `User`).
-- [ ] **2.2** Implementirati JWT filter i `AuthenticationManager`.
-- [ ] **2.3** Napisati `controller/AuthController.java` sa endpointima:
+- [x] **2.1** Implementirati `UserDetailsService` (kroz `User`).
+- [x] **2.2** Implementirati JWT filter i `AuthenticationManager`.
+- [x] **2.3** Napisati `controller/AuthController.java` sa endpointima:
   - `POST /api/auth/register` (kreira AccountRequest)
   - `POST /api/auth/login` (vraća JWT)
-- [ ] **2.4** Dodati `controller/AdminController.java` za obradu zahteva (samo admin):
+- [x] **2.4** Dodati `controller/AdminController.java` za obradu zahteva (samo admin):
   - `GET /api/admin/account-requests`
   - `PUT /api/admin/account-requests/{id}/accept`
   - `PUT /api/admin/account-requests/{id}/reject`
-- [ ] **2.5** Nakon prihvatanja, kreirati `User` i poslati email (mock ili JavaMail).
-- [ ] **2.6** Implementirati logout (na frontendu brisanje tokena, opciono blacklist na back-endu).
-- [ ] **2.7** Dodati `@PreAuthorize` anotacije na sve kontrolere (ADMIN, MANAGER, USER).
+- [x] **2.5** Nakon prihvatanja, kreirati `User` i poslati email (mock ili JavaMail).
+- [x] **2.6** Implementirati logout (na frontendu brisanje tokena, opciono blacklist na back-endu).
+- [x] **2.7** Dodati `@PreAuthorize` anotacije na sve kontrolere (ADMIN, MANAGER, USER).
 
 ---
 
