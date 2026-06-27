@@ -42,7 +42,7 @@ public class SearchService {
                                          Float spaceFrom, Float spaceTo,
                                          Float experienceFrom, Float experienceTo,
                                          String boolOperator, String mltField,
-                                         String sortDirection) {
+                                         String sortDirection, String sortBy) {
 
         boolean useAnd = "AND".equalsIgnoreCase(boolOperator);
 
@@ -100,7 +100,8 @@ public class SearchService {
                 .withHighlightQuery(buildHighlight());
 
         SortOrder order = "desc".equalsIgnoreCase(sortDirection) ? SortOrder.Desc : SortOrder.Asc;
-        queryBuilder.withSort(s -> s.field(f -> f.field("name.sort").order(order)));
+        String sortField = "rating".equalsIgnoreCase(sortBy) ? "avgExperienceGrade" : "name.sort";
+        queryBuilder.withSort(s -> s.field(f -> f.field(sortField).order(order)));
 
         NativeQuery nativeQuery = queryBuilder.build();
 

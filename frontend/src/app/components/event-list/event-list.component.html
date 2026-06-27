@@ -1,62 +1,68 @@
-<div class="container">
-  <h2>Events</h2>
+<div class="container py-4">
+  <h2 class="mb-3">Events</h2>
 
-  <mat-card class="filter-card">
-    <form [formGroup]="filterForm" (ngSubmit)="onFilter()" class="filter-form">
-      <mat-form-field appearance="outline">
-        <mat-label>Type</mat-label>
-        <input matInput formControlName="type">
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Location</mat-label>
-        <mat-select formControlName="locationId">
-          <mat-option value="">All</mat-option>
-          <mat-option *ngFor="let loc of locations" [value]="loc.id">{{ loc.name }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Address</mat-label>
-        <input matInput formControlName="address">
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Min Price</mat-label>
-        <input matInput formControlName="minPrice" type="number">
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Max Price</mat-label>
-        <input matInput formControlName="maxPrice" type="number">
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Date From</mat-label>
-        <input matInput [matDatepicker]="fromPicker" formControlName="dateFrom">
-        <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
-        <mat-datepicker #fromPicker></mat-datepicker>
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Date To</mat-label>
-        <input matInput [matDatepicker]="toPicker" formControlName="dateTo">
-        <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
-        <mat-datepicker #toPicker></mat-datepicker>
-      </mat-form-field>
-      <button mat-raised-button color="primary" type="submit">Filter</button>
-      <button mat-button type="button" (click)="onClear()">Clear</button>
-    </form>
-  </mat-card>
-
-  <div class="card-grid">
-    <mat-card *ngFor="let event of events" [routerLink]="['/locations', event.locationId]">
-      <img mat-card-image [src]="event.imageUrl" [alt]="event.name" *ngIf="event.imageUrl">
-      <mat-card-header>
-        <mat-card-title>{{ event.name }}</mat-card-title>
-        <mat-card-subtitle>{{ event.date | date }} · {{ event.locationName }}</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <p>{{ event.type }} · {{ event.address }}</p>
-        <p *ngIf="event.price > 0">{{ event.price }} RSD</p>
-        <p *ngIf="event.price === 0">Free</p>
-      </mat-card-content>
-    </mat-card>
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <form [formGroup]="filterForm" (ngSubmit)="onFilter()">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-3">
+            <label for="filterType" class="form-label">Type</label>
+            <input type="text" class="form-control" id="filterType" formControlName="type" placeholder="Event type">
+          </div>
+          <div class="col-md-3">
+            <label for="filterLocation" class="form-label">Location</label>
+            <select class="form-select" id="filterLocation" formControlName="locationId">
+              <option value="">All</option>
+              <option *ngFor="let loc of locations" [value]="loc.id">{{ loc.name }}</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="filterAddress" class="form-label">Address</label>
+            <input type="text" class="form-control" id="filterAddress" formControlName="address" placeholder="Address">
+          </div>
+          <div class="col-md-3">
+            <label for="filterMinPrice" class="form-label">Min Price</label>
+            <input type="number" class="form-control" id="filterMinPrice" formControlName="minPrice" placeholder="0">
+          </div>
+        </div>
+        <div class="row g-3 mt-1 align-items-end">
+          <div class="col-md-3">
+            <label for="filterMaxPrice" class="form-label">Max Price</label>
+            <input type="number" class="form-control" id="filterMaxPrice" formControlName="maxPrice" placeholder="Max">
+          </div>
+          <div class="col-md-3">
+            <label for="filterDateFrom" class="form-label">Date From</label>
+            <input type="date" class="form-control" id="filterDateFrom" formControlName="dateFrom">
+          </div>
+          <div class="col-md-3">
+            <label for="filterDateTo" class="form-label">Date To</label>
+            <input type="date" class="form-control" id="filterDateTo" formControlName="dateTo">
+          </div>
+          <div class="col-md-3">
+            <button type="submit" class="btn btn-primary me-2">
+              <i class="bi bi-funnel me-1"></i>Filter
+            </button>
+            <button type="button" class="btn btn-outline-secondary" (click)="onClear()">Clear</button>
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <p *ngIf="events.length === 0">No events found.</p>
+  <div class="row g-4">
+    <div class="col-md-4" *ngFor="let event of events">
+      <div class="card h-100" [routerLink]="['/locations', event.locationId]" style="cursor: pointer;">
+        <img [src]="event.imageUrl" [alt]="event.name" class="card-img-top" *ngIf="event.imageUrl">
+        <div class="card-body">
+          <h5 class="card-title">{{ event.name }}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">{{ event.date | date }} &middot; {{ event.locationName }}</h6>
+          <p class="card-text">{{ event.type }} &middot; {{ event.address }}</p>
+          <span class="badge bg-success" *ngIf="event.price === 0">Free</span>
+          <span class="badge bg-primary" *ngIf="event.price > 0">{{ event.price }} RSD</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-info mt-4" *ngIf="events.length === 0">No events found.</div>
 </div>

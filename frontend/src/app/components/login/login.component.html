@@ -1,24 +1,31 @@
-<div class="auth-container">
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>Login</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email</mat-label>
-          <input matInput formControlName="email" type="email">
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
-          <input matInput formControlName="password" type="password">
-        </mat-form-field>
-        <button mat-raised-button color="primary" type="submit" class="full-width"
-                [disabled]="loginForm.invalid">Login</button>
-      </form>
-    </mat-card-content>
-    <mat-card-actions>
-      <a mat-button routerLink="/register">Don't have an account? Register</a>
-    </mat-card-actions>
-  </mat-card>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="text-center mb-4">
+        <h2 class="fw-bold">Dobrodosli u New Now</h2>
+        <p class="text-muted">Otkrijte najbolja mesta, dogadjaje i utiske u vasem gradu. Prijavite se da biste nastavili.</p>
+      </div>
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h4 class="card-title mb-3">Login</h4>
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" formControlName="email" placeholder="name@example.com">
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input type="password" class="form-control" id="password" formControlName="password">
+            </div>
+            <button type="submit" class="btn btn-primary w-100" [disabled]="loginForm.invalid">
+              <i class="bi bi-box-arrow-in-right me-1"></i>Login
+            </button>
+          </form>
+        </div>
+        <div class="card-footer text-center bg-light">
+          <a routerLink="/register" class="text-decoration-none">Don't have an account? Register</a>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

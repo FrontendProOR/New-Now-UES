@@ -1,166 +1,182 @@
-<div class="container">
-  <h2>Advanced Search (UES)</h2>
+<div class="container py-4">
+  <h2 class="mb-3"><i class="bi bi-search me-2"></i>Advanced Search (UES)</h2>
 
-  <mat-card class="search-card">
-    <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
-      <div class="hint">
-        Use <strong>"..."</strong> for phrase, <strong>term*</strong> for prefix, <strong>~term</strong> for fuzzy search.
-      </div>
-
-      <h3>Text Search</h3>
-      <div class="form-row">
-        <mat-form-field appearance="outline">
-          <mat-label>Name</mat-label>
-          <input matInput formControlName="name">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Description</mat-label>
-          <input matInput formControlName="description">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>PDF Content</mat-label>
-          <input matInput formControlName="fileDescription">
-        </mat-form-field>
-      </div>
-
-      <div class="form-row">
-        <mat-form-field appearance="outline">
-          <mat-label>Boolean Operator</mat-label>
-          <mat-select formControlName="operator">
-            <mat-option value="OR">OR</mat-option>
-            <mat-option value="AND">AND</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>More Like This</mat-label>
-          <input matInput formControlName="mlt" placeholder="Enter text to find similar">
-        </mat-form-field>
-      </div>
-
-      <mat-expansion-panel>
-        <mat-expansion-panel-header>
-          <mat-panel-title>Range Filters</mat-panel-title>
-        </mat-expansion-panel-header>
-
-        <h4>Review Count</h4>
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>From</mat-label>
-            <input matInput type="number" formControlName="reviewCountFrom">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>To</mat-label>
-            <input matInput type="number" formControlName="reviewCountTo">
-          </mat-form-field>
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
+        <div class="alert alert-light border mb-3">
+          Use <strong>"..."</strong> for phrase, <strong>term*</strong> for prefix, <strong>~term</strong> for fuzzy search.
         </div>
 
-        <h4>Performance Rating</h4>
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>From</mat-label>
-            <input matInput type="number" formControlName="performanceFrom" min="1" max="10">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>To</mat-label>
-            <input matInput type="number" formControlName="performanceTo" min="1" max="10">
-          </mat-form-field>
+        <h5 class="mb-3">Text Search</h5>
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <label for="searchName" class="form-label">Name</label>
+            <input type="text" class="form-control" id="searchName" formControlName="name" placeholder="Location name">
+          </div>
+          <div class="col-md-4">
+            <label for="searchDescription" class="form-label">Description</label>
+            <input type="text" class="form-control" id="searchDescription" formControlName="description" placeholder="Description keywords">
+          </div>
+          <div class="col-md-4">
+            <label for="searchPdf" class="form-label">PDF Content</label>
+            <input type="text" class="form-control" id="searchPdf" formControlName="fileDescription" placeholder="PDF content">
+          </div>
         </div>
 
-        <h4>Sound Rating</h4>
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>From</mat-label>
-            <input matInput type="number" formControlName="soundFrom" min="1" max="10">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>To</mat-label>
-            <input matInput type="number" formControlName="soundTo" min="1" max="10">
-          </mat-form-field>
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <label for="searchOperator" class="form-label">Boolean Operator</label>
+            <select class="form-select" id="searchOperator" formControlName="operator">
+              <option value="OR">OR</option>
+              <option value="AND">AND</option>
+            </select>
+          </div>
+          <div class="col-md-8">
+            <label for="searchMlt" class="form-label">More Like This</label>
+            <input type="text" class="form-control" id="searchMlt" formControlName="mlt" placeholder="Enter text to find similar locations">
+          </div>
         </div>
 
-        <h4>Lighting Rating</h4>
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>From</mat-label>
-            <input matInput type="number" formControlName="lightingFrom" min="1" max="10">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>To</mat-label>
-            <input matInput type="number" formControlName="lightingTo" min="1" max="10">
-          </mat-form-field>
+        <div class="accordion mb-3" id="rangeFilters">
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="rangeFiltersHeading">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#rangeFiltersCollapse" aria-expanded="false" aria-controls="rangeFiltersCollapse">
+                Range Filters
+              </button>
+            </h2>
+            <div id="rangeFiltersCollapse" class="accordion-collapse collapse" aria-labelledby="rangeFiltersHeading" data-bs-parent="#rangeFilters">
+              <div class="accordion-body">
+                <h6 class="mb-2">Review Count</h6>
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">From</label>
+                    <input type="number" class="form-control" formControlName="reviewCountFrom">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">To</label>
+                    <input type="number" class="form-control" formControlName="reviewCountTo">
+                  </div>
+                </div>
+
+                <h6 class="mb-2">Performance Rating</h6>
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">From</label>
+                    <input type="number" class="form-control" formControlName="performanceFrom" min="1" max="10">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">To</label>
+                    <input type="number" class="form-control" formControlName="performanceTo" min="1" max="10">
+                  </div>
+                </div>
+
+                <h6 class="mb-2">Sound Rating</h6>
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">From</label>
+                    <input type="number" class="form-control" formControlName="soundFrom" min="1" max="10">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">To</label>
+                    <input type="number" class="form-control" formControlName="soundTo" min="1" max="10">
+                  </div>
+                </div>
+
+                <h6 class="mb-2">Lighting Rating</h6>
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">From</label>
+                    <input type="number" class="form-control" formControlName="lightingFrom" min="1" max="10">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">To</label>
+                    <input type="number" class="form-control" formControlName="lightingTo" min="1" max="10">
+                  </div>
+                </div>
+
+                <h6 class="mb-2">Space Rating</h6>
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">From</label>
+                    <input type="number" class="form-control" formControlName="spaceFrom" min="1" max="10">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">To</label>
+                    <input type="number" class="form-control" formControlName="spaceTo" min="1" max="10">
+                  </div>
+                </div>
+
+                <h6 class="mb-2">Overall Experience Rating</h6>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">From</label>
+                    <input type="number" class="form-control" formControlName="experienceFrom" min="1" max="10">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">To</label>
+                    <input type="number" class="form-control" formControlName="experienceTo" min="1" max="10">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <h4>Space Rating</h4>
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>From</mat-label>
-            <input matInput type="number" formControlName="spaceFrom" min="1" max="10">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>To</mat-label>
-            <input matInput type="number" formControlName="spaceTo" min="1" max="10">
-          </mat-form-field>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-search me-1"></i>Search
+          </button>
+          <button type="button" class="btn btn-outline-secondary" (click)="onClear()">Clear</button>
         </div>
-
-        <h4>Overall Experience Rating</h4>
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>From</mat-label>
-            <input matInput type="number" formControlName="experienceFrom" min="1" max="10">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>To</mat-label>
-            <input matInput type="number" formControlName="experienceTo" min="1" max="10">
-          </mat-form-field>
-        </div>
-      </mat-expansion-panel>
-
-      <div class="actions">
-        <button mat-raised-button color="primary" type="submit">Search</button>
-        <button mat-button type="button" (click)="onClear()">Clear</button>
-      </div>
-    </form>
-  </mat-card>
-
-  <div class="results-header" *ngIf="searched">
-    <h3>Results ({{ results.length }})</h3>
-    <button mat-button (click)="toggleSort()">
-      Sort by name <mat-icon>{{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
-    </button>
+      </form>
+    </div>
   </div>
 
-  <div class="results-list" *ngIf="searched">
-    <mat-card *ngFor="let result of results" class="result-card" [routerLink]="['/locations', result.id]">
-      <mat-card-header>
-        <mat-card-title>
-          <span *ngIf="result.highlights && result.highlights['name']" [innerHTML]="result.highlights!['name']"></span>
-          <span *ngIf="!result.highlights || !result.highlights['name']">{{ result.name }}</span>
-        </mat-card-title>
-        <mat-card-subtitle>
-          Reviews: {{ result.reviewCount || 0 }}
-        </mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <p class="description" *ngIf="result.highlights && result.highlights['description']" [innerHTML]="result.highlights!['description']"></p>
-        <p class="description" *ngIf="(!result.highlights || !result.highlights['description']) && result.description">
-          {{ result.description | slice:0:200 }}...
-        </p>
-
-        <div class="ratings-row" *ngIf="result.avgPerformanceGrade || result.avgSoundGrade || result.avgSpaceGrade || result.avgExperienceGrade">
-          <span *ngIf="result.avgPerformanceGrade">Performance: {{ result.avgPerformanceGrade | number:'1.1-1' }}</span>
-          <span *ngIf="result.avgSoundGrade">Sound: {{ result.avgSoundGrade | number:'1.1-1' }}</span>
-          <span *ngIf="result.avgLightingGrade">Lighting: {{ result.avgLightingGrade | number:'1.1-1' }}</span>
-          <span *ngIf="result.avgSpaceGrade">Space: {{ result.avgSpaceGrade | number:'1.1-1' }}</span>
-          <span *ngIf="result.avgExperienceGrade">Experience: {{ result.avgExperienceGrade | number:'1.1-1' }}</span>
-        </div>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-button color="primary" (click)="downloadPdf(result.id); $event.stopPropagation()">
-          <mat-icon>picture_as_pdf</mat-icon> Download PDF
+  <div *ngIf="searched">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="mb-0">Results ({{ results.length }})</h4>
+      <div class="dropdown">
+        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          <i class="bi bi-sort-alpha-down me-1"></i>Sort
         </button>
-      </mat-card-actions>
-    </mat-card>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" (click)="sortDirection = 'asc'; onSearch()">Name A-Z</a></li>
+          <li><a class="dropdown-item" (click)="sortDirection = 'desc'; onSearch()">Name Z-A</a></li>
+        </ul>
+      </div>
+    </div>
 
-    <p *ngIf="results.length === 0">No results found.</p>
+    <div class="card mb-3" *ngFor="let result of results" [routerLink]="['/locations', result.id]" style="cursor: pointer;">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div class="flex-grow-1">
+            <h5 class="card-title">
+              <span *ngIf="result.highlights && result.highlights['name']" [innerHTML]="result.highlights!['name']"></span>
+              <span *ngIf="!result.highlights || !result.highlights['name']">{{ result.name }}</span>
+            </h5>
+            <p class="text-muted mb-2">Reviews: {{ result.reviewCount || 0 }}</p>
+
+            <p class="card-text" *ngIf="result.highlights && result.highlights['description']" [innerHTML]="result.highlights!['description']"></p>
+            <p class="card-text" *ngIf="(!result.highlights || !result.highlights['description']) && result.description">
+              {{ result.description | slice:0:200 }}...
+            </p>
+
+            <div class="d-flex flex-wrap gap-2 mt-2" *ngIf="result.avgPerformanceGrade || result.avgSoundGrade || result.avgSpaceGrade || result.avgExperienceGrade">
+              <span class="badge bg-secondary" *ngIf="result.avgPerformanceGrade">Performance: {{ result.avgPerformanceGrade | number:'1.1-1' }}</span>
+              <span class="badge bg-secondary" *ngIf="result.avgSoundGrade">Sound: {{ result.avgSoundGrade | number:'1.1-1' }}</span>
+              <span class="badge bg-secondary" *ngIf="result.avgLightingGrade">Lighting: {{ result.avgLightingGrade | number:'1.1-1' }}</span>
+              <span class="badge bg-secondary" *ngIf="result.avgSpaceGrade">Space: {{ result.avgSpaceGrade | number:'1.1-1' }}</span>
+              <span class="badge bg-secondary" *ngIf="result.avgExperienceGrade">Experience: {{ result.avgExperienceGrade | number:'1.1-1' }}</span>
+            </div>
+          </div>
+          <button class="btn btn-outline-primary btn-sm ms-3" (click)="downloadPdf(result.id); $event.stopPropagation()">
+            <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert alert-info" *ngIf="results.length === 0">No results found.</div>
   </div>
 </div>

@@ -1,92 +1,176 @@
-<div class="container">
-  <h2>Manager Dashboard</h2>
+<div class="container py-4">
+  <h2 class="mb-4">Manager Dashboard</h2>
 
-  <mat-form-field appearance="outline" *ngIf="managedLocations.length > 1">
-    <mat-label>Select Location</mat-label>
-    <mat-select [(value)]="selectedLocationId" (selectionChange)="onLocationChange()">
-      <mat-option *ngFor="let loc of managedLocations" [value]="loc.id">{{ loc.name }}</mat-option>
-    </mat-select>
-  </mat-form-field>
-  <h3 *ngIf="managedLocations.length === 1">{{ managedLocations[0].name }}</h3>
+  <div class="mb-3" *ngIf="managedLocations.length > 1">
+    <label for="locationSelect" class="form-label">Select Location</label>
+    <select class="form-select" id="locationSelect" [(ngModel)]="selectedLocationId" (change)="onLocationChange()">
+      <option *ngFor="let loc of managedLocations" [value]="loc.id">{{ loc.name }}</option>
+    </select>
+  </div>
+  <h3 *ngIf="managedLocations.length === 1" class="mb-3">{{ managedLocations[0].name }}</h3>
 
-  <mat-tab-group *ngIf="selectedLocationId">
-    <mat-tab label="Events">
-      <div class="tab-content">
-        <mat-card class="form-card">
-          <mat-card-header><mat-card-title>Create Event</mat-card-title></mat-card-header>
-          <mat-card-content>
-            <form [formGroup]="eventForm" (ngSubmit)="createEvent()" class="create-form">
-              <mat-form-field appearance="outline"><mat-label>Name</mat-label><input matInput formControlName="name"></mat-form-field>
-              <mat-form-field appearance="outline"><mat-label>Address</mat-label><input matInput formControlName="address"></mat-form-field>
-              <mat-form-field appearance="outline"><mat-label>Type</mat-label><input matInput formControlName="type"></mat-form-field>
-              <mat-form-field appearance="outline"><mat-label>Date</mat-label><input matInput formControlName="date" type="date"></mat-form-field>
-              <mat-form-field appearance="outline"><mat-label>Price (0 = free)</mat-label><input matInput formControlName="price" type="number"></mat-form-field>
-              <mat-checkbox formControlName="recurrent">Recurrent event</mat-checkbox>
-              <div class="file-input"><label>Image *:</label><input type="file" (change)="onEventImageSelected($event)" accept="image/*"></div>
-              <button mat-raised-button color="primary" type="submit" [disabled]="eventForm.invalid || !selectedEventImage">Create Event</button>
-            </form>
-          </mat-card-content>
-        </mat-card>
-      </div>
-    </mat-tab>
+  <div *ngIf="selectedLocationId">
+    <ul class="nav nav-tabs mb-3">
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeManagerTab === 0" (click)="activeManagerTab = 0">
+          <i class="bi bi-calendar-event me-1"></i>Events
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeManagerTab === 1" (click)="activeManagerTab = 1">
+          <i class="bi bi-chat-left-text me-1"></i>Reviews ({{ reviews.length }})
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeManagerTab === 2" (click)="activeManagerTab = 2">
+          <i class="bi bi-graph-up me-1"></i>Analytics
+        </a>
+      </li>
+    </ul>
 
-    <mat-tab label="Reviews ({{ reviews.length }})">
-      <div class="tab-content">
-        <mat-card *ngFor="let review of reviews" class="review-card">
-          <mat-card-header>
-            <mat-card-title>{{ review.eventName }}</mat-card-title>
-            <mat-card-subtitle>{{ review.authorName }} · {{ review.createdAt | date:'short' }}
-              <span *ngIf="review.hidden" class="hidden-badge">HIDDEN</span>
-            </mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
-            <p *ngIf="review.rate?.overallImpression">Overall: {{ review.rate.overallImpression }}/10</p>
-            <p *ngIf="review.rootComment">{{ review.rootComment }}</p>
-          </mat-card-content>
-          <mat-card-actions>
-            <button mat-button (click)="hideReview(review.id)" *ngIf="!review.hidden">Hide</button>
-            <button mat-button color="warn" (click)="deleteReview(review.id)">Delete</button>
-          </mat-card-actions>
-        </mat-card>
-        <p *ngIf="reviews.length === 0">No reviews.</p>
-      </div>
-    </mat-tab>
-
-    <mat-tab label="Analytics">
-      <div class="tab-content">
-        <div class="period-selector">
-          <mat-form-field appearance="outline">
-            <mat-label>Period</mat-label>
-            <mat-select [(value)]="period" (selectionChange)="loadAnalytics()">
-              <mat-option value="weekly">Weekly</mat-option>
-              <mat-option value="monthly">Monthly</mat-option>
-              <mat-option value="yearly">Yearly</mat-option>
-            </mat-select>
-          </mat-form-field>
+    <!-- Events Tab -->
+    <div *ngIf="activeManagerTab === 0" class="pt-3">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+          <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Create Event</h5>
         </div>
-
-        <div *ngIf="analytics" class="analytics-content">
-          <div class="stats-grid">
-            <mat-card><mat-card-header><mat-card-title>{{ analytics.totalEvents }}</mat-card-title></mat-card-header><mat-card-content>Total Events</mat-card-content></mat-card>
-            <mat-card><mat-card-header><mat-card-title>{{ analytics.recurrentEvents }}</mat-card-title></mat-card-header><mat-card-content>Recurrent</mat-card-content></mat-card>
-            <mat-card><mat-card-header><mat-card-title>{{ analytics.freeEvents }}</mat-card-title></mat-card-header><mat-card-content>Free</mat-card-content></mat-card>
-            <mat-card><mat-card-header><mat-card-title>{{ analytics.paidEvents }}</mat-card-title></mat-card-header><mat-card-content>Paid</mat-card-content></mat-card>
-          </div>
-
-          <div class="chart-container" *ngIf="chartData">
-            <canvas baseChart [data]="chartData" [options]="chartOptions" type="pie"></canvas>
-          </div>
-
-          <h4 *ngIf="analytics.topEventsByRating.length > 0">Top Events by Rating</h4>
-          <mat-list *ngIf="analytics.topEventsByRating.length > 0">
-            <mat-list-item *ngFor="let e of analytics.topEventsByRating">
-              {{ e.eventName }} — {{ e.averageRating | number:'1.1-1' }}
-            </mat-list-item>
-          </mat-list>
+        <div class="card-body">
+          <form [formGroup]="eventForm" (ngSubmit)="createEvent()">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="eventName" class="form-label">Name</label>
+                <input type="text" class="form-control" id="eventName" formControlName="name">
+              </div>
+              <div class="col-md-6">
+                <label for="eventAddress" class="form-label">Address</label>
+                <input type="text" class="form-control" id="eventAddress" formControlName="address">
+              </div>
+              <div class="col-md-4">
+                <label for="eventType" class="form-label">Type</label>
+                <input type="text" class="form-control" id="eventType" formControlName="type">
+              </div>
+              <div class="col-md-4">
+                <label for="eventDate" class="form-label">Date</label>
+                <input type="date" class="form-control" id="eventDate" formControlName="date">
+              </div>
+              <div class="col-md-4">
+                <label for="eventPrice" class="form-label">Price (0 = free)</label>
+                <input type="number" class="form-control" id="eventPrice" formControlName="price">
+              </div>
+              <div class="col-md-6">
+                <div class="form-check mt-3">
+                  <input class="form-check-input" type="checkbox" id="eventRecurrent" formControlName="recurrent">
+                  <label class="form-check-label" for="eventRecurrent">Recurrent event</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Image *</label>
+                <input type="file" class="form-control" (change)="onEventImageSelected($event)" accept="image/*">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3" [disabled]="eventForm.invalid || !selectedEventImage">
+              <i class="bi bi-plus-lg me-1"></i>Create Event
+            </button>
+          </form>
         </div>
       </div>
-    </mat-tab>
-  </mat-tab-group>
+    </div>
 
-  <p *ngIf="managedLocations.length === 0">You are not managing any locations.</p>
+    <!-- Reviews Tab -->
+    <div *ngIf="activeManagerTab === 1" class="pt-3">
+      <div class="card mb-3" *ngFor="let review of reviews">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h5 class="card-title mb-1">{{ review.eventName }}</h5>
+              <p class="text-muted mb-2">
+                {{ review.authorName }} &middot; {{ review.createdAt | date:'short' }}
+                <span class="badge bg-warning text-dark ms-2" *ngIf="review.hidden">HIDDEN</span>
+              </p>
+            </div>
+            <div>
+              <button class="btn btn-outline-secondary btn-sm me-1" (click)="hideReview(review.id)" *ngIf="!review.hidden">
+                <i class="bi bi-eye-slash me-1"></i>Hide
+              </button>
+              <button class="btn btn-danger btn-sm" (click)="deleteReview(review.id)">
+                <i class="bi bi-trash me-1"></i>Delete
+              </button>
+            </div>
+          </div>
+          <span class="badge bg-primary me-1" *ngIf="review.rate?.overallImpression">
+            Overall: {{ review.rate.overallImpression }}/10
+          </span>
+          <p class="mt-2 mb-0" *ngIf="review.rootComment">{{ review.rootComment }}</p>
+        </div>
+      </div>
+      <div class="alert alert-info" *ngIf="reviews.length === 0">No reviews.</div>
+    </div>
+
+    <!-- Analytics Tab -->
+    <div *ngIf="activeManagerTab === 2" class="pt-3">
+      <div class="mb-3">
+        <label for="periodSelect" class="form-label">Period</label>
+        <select class="form-select w-auto" id="periodSelect" [(ngModel)]="period" (change)="loadAnalytics()">
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+
+      <div *ngIf="analytics">
+        <div class="row g-3 mb-4">
+          <div class="col-md-3 col-6">
+            <div class="card text-center bg-primary text-white">
+              <div class="card-body">
+                <h3 class="mb-0">{{ analytics.totalEvents }}</h3>
+                <small>Total Events</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="card text-center bg-info text-white">
+              <div class="card-body">
+                <h3 class="mb-0">{{ analytics.recurrentEvents }}</h3>
+                <small>Recurrent</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="card text-center bg-success text-white">
+              <div class="card-body">
+                <h3 class="mb-0">{{ analytics.freeEvents }}</h3>
+                <small>Free</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="card text-center bg-danger text-white">
+              <div class="card-body">
+                <h3 class="mb-0">{{ analytics.paidEvents }}</h3>
+                <small>Paid</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-container" *ngIf="chartData">
+          <canvas baseChart [data]="chartData" [options]="chartOptions" type="pie"></canvas>
+        </div>
+
+        <div *ngIf="analytics.topEventsByRating.length > 0" class="mt-4">
+          <h5>Top Events by Rating</h5>
+          <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let e of analytics.topEventsByRating">
+              {{ e.eventName }}
+              <span class="badge bg-primary rounded-pill">{{ e.averageRating | number:'1.1-1' }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-warning mt-3" *ngIf="managedLocations.length === 0">
+    You are not managing any locations.
+  </div>
 </div>

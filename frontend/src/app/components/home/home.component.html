@@ -1,46 +1,53 @@
-<div class="home-container">
-  <h2>Today's Events</h2>
-  <div class="card-grid" *ngIf="todayEvents.length > 0; else noEvents">
-    <mat-card *ngFor="let event of todayEvents" [routerLink]="['/locations', event.locationId]">
-      <img mat-card-image [src]="event.imageUrl" [alt]="event.name" *ngIf="event.imageUrl">
-      <mat-card-header>
-        <mat-card-title>{{ event.name }}</mat-card-title>
-        <mat-card-subtitle>{{ event.locationName }} · {{ event.type }}</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <p>{{ event.address }}</p>
-        <p *ngIf="event.price > 0">{{ event.price }} RSD</p>
-        <p *ngIf="event.price === 0">Free</p>
-      </mat-card-content>
-    </mat-card>
+<div class="container py-4">
+  <h2 class="mb-3"><i class="bi bi-calendar-event me-2"></i>Danasnji dogadjaji</h2>
+  <div class="row g-4 mb-5" *ngIf="todayEvents.length > 0; else noEvents">
+    <div class="col-md-4" *ngFor="let event of todayEvents">
+      <div class="card h-100" [routerLink]="['/locations', event.locationId]" style="cursor: pointer;">
+        <img [src]="event.imageUrl" [alt]="event.name" class="card-img-top" *ngIf="event.imageUrl">
+        <div class="card-body">
+          <h5 class="card-title">{{ event.name }}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">{{ event.locationName }} &middot; {{ event.type }}</h6>
+          <p class="card-text">{{ event.address }}</p>
+          <span class="badge bg-success" *ngIf="event.price === 0">Free</span>
+          <span class="badge bg-primary" *ngIf="event.price > 0">{{ event.price }} RSD</span>
+        </div>
+      </div>
+    </div>
   </div>
-  <ng-template #noEvents><p>No events today.</p></ng-template>
+  <ng-template #noEvents>
+    <div class="alert alert-info mb-5">No events today.</div>
+  </ng-template>
 
-  <h2>Popular Locations</h2>
-  <div class="card-grid" *ngIf="popularLocations.length > 0">
-    <mat-card *ngFor="let loc of popularLocations" [routerLink]="['/locations', loc.id]">
-      <img mat-card-image [src]="loc.imageUrl" [alt]="loc.name" *ngIf="loc.imageUrl">
-      <mat-card-header>
-        <mat-card-title>{{ loc.name }}</mat-card-title>
-        <mat-card-subtitle>{{ loc.address }}</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <p>Rating: {{ loc.totalRating | number:'1.1-1' }}</p>
-      </mat-card-content>
-    </mat-card>
+  <h2 class="mb-3"><i class="bi bi-geo-alt me-2"></i>Najpopularnija mesta</h2>
+  <div class="row g-4 mb-5" *ngIf="popularLocations.length > 0">
+    <div class="col-md-4" *ngFor="let loc of popularLocations">
+      <div class="card h-100" [routerLink]="['/locations', loc.id]" style="cursor: pointer;">
+        <img [src]="loc.imageUrl" [alt]="loc.name" class="card-img-top" *ngIf="loc.imageUrl">
+        <div class="card-body">
+          <h5 class="card-title">{{ loc.name }}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">{{ loc.address }}</h6>
+        </div>
+        <div class="card-footer bg-white">
+          <span class="badge bg-warning text-dark">
+            <i class="bi bi-star-fill me-1"></i>{{ loc.totalRating | number:'1.1-1' }}
+          </span>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <h2>Latest Reviews</h2>
-  <div *ngIf="latestReviews.length > 0">
-    <mat-card *ngFor="let review of latestReviews" class="review-card">
-      <mat-card-header>
-        <mat-card-title>{{ review.eventName }}</mat-card-title>
-        <mat-card-subtitle>by {{ review.authorName }} · {{ review.createdAt | date:'short' }}</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <p *ngIf="review.rate?.overallImpression">Overall: {{ review.rate.overallImpression }}/10</p>
-        <p *ngIf="review.rootComment">{{ review.rootComment }}</p>
-      </mat-card-content>
-    </mat-card>
+  <h2 class="mb-3"><i class="bi bi-chat-left-text me-2"></i>Najnoviji utisci</h2>
+  <div class="list-group mb-4" *ngIf="latestReviews.length > 0">
+    <div class="list-group-item" *ngFor="let review of latestReviews">
+      <div class="d-flex w-100 justify-content-between">
+        <h5 class="mb-1">{{ review.eventName }}</h5>
+        <small class="text-muted">{{ review.createdAt | date:'short' }}</small>
+      </div>
+      <p class="mb-1 text-muted">by {{ review.authorName }}</p>
+      <span class="badge bg-info me-2" *ngIf="review.rate?.overallImpression">
+        Overall: {{ review.rate.overallImpression }}/10
+      </span>
+      <p class="mb-0 mt-2" *ngIf="review.rootComment">{{ review.rootComment }}</p>
+    </div>
   </div>
 </div>

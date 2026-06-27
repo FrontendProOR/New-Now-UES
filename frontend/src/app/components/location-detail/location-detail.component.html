@@ -1,62 +1,68 @@
-<div class="container" *ngIf="location">
-  <mat-card class="detail-card">
-    <img mat-card-image [src]="location.imageUrl" [alt]="location.name" *ngIf="location.imageUrl">
-    <mat-card-header>
-      <mat-card-title>{{ location.name }}</mat-card-title>
-      <mat-card-subtitle>{{ location.address }} · {{ location.type }}</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <p *ngIf="location.totalRating">Rating: {{ location.totalRating | number:'1.1-1' }}</p>
-      <p *ngIf="location.description">{{ location.description }}</p>
-    </mat-card-content>
-  </mat-card>
-
-  <h3>Upcoming Events</h3>
-  <div class="card-grid" *ngIf="events.length > 0; else noEvents">
-    <mat-card *ngFor="let event of events">
-      <img mat-card-image [src]="event.imageUrl" [alt]="event.name" *ngIf="event.imageUrl">
-      <mat-card-header>
-        <mat-card-title>{{ event.name }}</mat-card-title>
-        <mat-card-subtitle>{{ event.date | date }} · {{ event.type }}</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <p *ngIf="event.price > 0">{{ event.price }} RSD</p>
-        <p *ngIf="event.price === 0">Free</p>
-        <mat-chip *ngIf="event.recurrent">Recurrent</mat-chip>
-      </mat-card-content>
-    </mat-card>
+<div class="container py-4" *ngIf="location">
+  <div class="card shadow-sm mb-4">
+    <img [src]="location.imageUrl" [alt]="location.name" class="card-img-top" style="max-height: 350px; object-fit: cover;" *ngIf="location.imageUrl">
+    <div class="card-body">
+      <h3 class="card-title">{{ location.name }}</h3>
+      <h6 class="card-subtitle mb-2 text-muted">{{ location.address }} &middot; {{ location.type }}</h6>
+      <span class="badge bg-warning text-dark me-2" *ngIf="location.totalRating">
+        <i class="bi bi-star-fill me-1"></i>{{ location.totalRating | number:'1.1-1' }}
+      </span>
+      <p class="card-text mt-3" *ngIf="location.description">{{ location.description }}</p>
+    </div>
   </div>
-  <ng-template #noEvents><p>No events at this location.</p></ng-template>
 
-  <div class="reviews-section">
-    <div class="reviews-header">
-      <h3>Reviews</h3>
-      <div class="sort-controls">
-        <button mat-button (click)="onSortChange('date')" [color]="sortBy === 'date' ? 'primary' : ''">By Date</button>
-        <button mat-button (click)="onSortChange('rating')" [color]="sortBy === 'rating' ? 'primary' : ''">By Rating</button>
-        <button mat-icon-button (click)="toggleDirection()">
-          <mat-icon>{{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+  <h3 class="mb-3"><i class="bi bi-calendar3 me-2"></i>Upcoming Events</h3>
+  <div class="row g-4 mb-4" *ngIf="events.length > 0; else noEvents">
+    <div class="col-md-4" *ngFor="let event of events">
+      <div class="card h-100">
+        <img [src]="event.imageUrl" [alt]="event.name" class="card-img-top" *ngIf="event.imageUrl">
+        <div class="card-body">
+          <h5 class="card-title">{{ event.name }}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">{{ event.date | date }} &middot; {{ event.type }}</h6>
+          <span class="badge bg-success me-1" *ngIf="event.price === 0">Free</span>
+          <span class="badge bg-primary me-1" *ngIf="event.price > 0">{{ event.price }} RSD</span>
+          <span class="badge bg-info" *ngIf="event.recurrent">Recurrent</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ng-template #noEvents>
+    <div class="alert alert-info mb-4">No events at this location.</div>
+  </ng-template>
+
+  <div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="mb-0"><i class="bi bi-chat-left-text me-2"></i>Reviews</h3>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm" [class.btn-primary]="sortBy === 'date'" [class.btn-outline-secondary]="sortBy !== 'date'" (click)="onSortChange('date')">By Date</button>
+        <button class="btn btn-sm" [class.btn-primary]="sortBy === 'rating'" [class.btn-outline-secondary]="sortBy !== 'rating'" (click)="onSortChange('rating')">By Rating</button>
+        <button class="btn btn-sm btn-outline-secondary" (click)="toggleDirection()">
+          <i class="bi" [class.bi-arrow-up]="sortDirection === 'asc'" [class.bi-arrow-down]="sortDirection !== 'asc'"></i>
         </button>
       </div>
     </div>
 
-    <a mat-raised-button color="accent" [routerLink]="['/locations', location.id, 'review']">Write a Review</a>
+    <a class="btn btn-success mb-3" [routerLink]="['/locations', location.id, 'review']">
+      <i class="bi bi-pencil-square me-1"></i>Write a Review
+    </a>
 
-    <mat-card *ngFor="let review of reviews" class="review-card">
-      <mat-card-header>
-        <mat-card-title>{{ review.eventName }}</mat-card-title>
-        <mat-card-subtitle>{{ review.authorName }} · {{ review.createdAt | date:'short' }} · Maintained {{ review.eventCount }} times</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="ratings" *ngIf="review.rate">
-          <span *ngIf="review.rate.performance">Performance: {{ review.rate.performance }}/10</span>
-          <span *ngIf="review.rate.soundAndLighting">Sound & Light: {{ review.rate.soundAndLighting }}/10</span>
-          <span *ngIf="review.rate.venue">Venue: {{ review.rate.venue }}/10</span>
-          <span *ngIf="review.rate.overallImpression">Overall: {{ review.rate.overallImpression }}/10</span>
+    <div class="card mb-3" *ngFor="let review of reviews">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h5 class="card-title mb-1">{{ review.eventName }}</h5>
+            <p class="text-muted mb-2">{{ review.authorName }} &middot; {{ review.createdAt | date:'short' }} &middot; Maintained {{ review.eventCount }} times</p>
+          </div>
         </div>
-        <p *ngIf="review.rootComment" class="comment-text">{{ review.rootComment }}</p>
-      </mat-card-content>
-    </mat-card>
-    <p *ngIf="reviews.length === 0">No reviews yet.</p>
+        <div class="mb-2" *ngIf="review.rate">
+          <span class="badge bg-secondary me-1" *ngIf="review.rate.performance">Performance: {{ review.rate.performance }}/10</span>
+          <span class="badge bg-secondary me-1" *ngIf="review.rate.soundAndLighting">Sound & Light: {{ review.rate.soundAndLighting }}/10</span>
+          <span class="badge bg-secondary me-1" *ngIf="review.rate.venue">Venue: {{ review.rate.venue }}/10</span>
+          <span class="badge bg-primary" *ngIf="review.rate.overallImpression">Overall: {{ review.rate.overallImpression }}/10</span>
+        </div>
+        <p class="comment-text mb-0" *ngIf="review.rootComment">{{ review.rootComment }}</p>
+      </div>
+    </div>
+    <div class="alert alert-info" *ngIf="reviews.length === 0">No reviews yet.</div>
   </div>
 </div>

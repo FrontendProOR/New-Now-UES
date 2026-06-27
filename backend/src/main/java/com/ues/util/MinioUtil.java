@@ -35,13 +35,34 @@ public class MinioUtil {
             if (!exists) {
                 minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
                 logger.info("Created MinIO bucket: {}", bucketName);
+            } else {
+                logger.info("MinIO bucket '{}' already exists", bucketName);
             }
         } catch (Exception e) {
-            logger.error("Failed to initialize MinIO bucket: {}", e.getMessage());
+            logger.warn("MinIO is not available at startup. Bucket '{}' will be created on first upload. Error: {}",
+                    bucketName, e.getMessage());
+        }
+    }
+
+    /**
+     * Ensures the bucket exists before performing operations.
+     * Called lazily when MinIO was not available at startup.
+     */
+    private void ensureBucketExists() {
+        try {
+            boolean exists = minioClient.bucketExists(
+                    BucketExistsArgs.builder().bucket(bucketName).build());
+            if (!exists) {
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
+                logger.info("Lazily created MinIO bucket: {}", bucketName);
+            }
+        } catch (Exception e) {
+            logger.error("Failed to ensure MinIO bucket exists: {}", e.getMessage());
         }
     }
 
     public String uploadFile(String folder, MultipartFile file) throws Exception {
+        ensureBucketExists();
         String extension = getExtension(file.getOriginalFilename());
         String objectName = folder + "/" + UUID.randomUUID() + extension;
 

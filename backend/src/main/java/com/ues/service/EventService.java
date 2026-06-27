@@ -177,7 +177,7 @@ public class EventService {
         dto.setLocationName(event.getLocation().getName());
 
         if (event.getImage() != null) {
-            dto.setImageUrl(minioUtil.getFileUrl(event.getImage().getServerFilename()));
+            dto.setImageUrl("/api/images/" + event.getImage().getServerFilename());
         }
 
         return dto;

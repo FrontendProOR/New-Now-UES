@@ -53,9 +53,10 @@ public class SearchController {
             @RequestParam(required = false) Float experienceTo,
             @RequestParam(defaultValue = "OR") String operator,
             @RequestParam(required = false) String mlt,
-            @RequestParam(defaultValue = "asc") String sortDirection) {
+            @RequestParam(defaultValue = "asc") String sortDirection,
+            @RequestParam(defaultValue = "name") String sortBy) {
 
-        logger.info("Search request: name={}, desc={}, pdf={}, operator={}", name, description, fileDescription, operator);
+        logger.info("Search request: name={}, desc={}, pdf={}, operator={}, sortBy={}", name, description, fileDescription, operator, sortBy);
 
         List<SearchResultDto> results = searchService.search(
                 name, description, fileDescription,
@@ -65,7 +66,7 @@ public class SearchController {
                 lightingFrom, lightingTo,
                 spaceFrom, spaceTo,
                 experienceFrom, experienceTo,
-                operator, mlt, sortDirection);
+                operator, mlt, sortDirection, sortBy);
 
         return ResponseEntity.ok(results);
     }

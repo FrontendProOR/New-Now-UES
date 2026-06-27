@@ -1,29 +1,36 @@
-<div class="auth-container">
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>Register</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email</mat-label>
-          <input matInput formControlName="email" type="email">
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
-          <input matInput formControlName="password" type="password">
-          <mat-hint>Minimum 6 characters</mat-hint>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Address</mat-label>
-          <input matInput formControlName="address">
-        </mat-form-field>
-        <button mat-raised-button color="primary" type="submit" class="full-width"
-                [disabled]="registerForm.invalid">Register</button>
-      </form>
-    </mat-card-content>
-    <mat-card-actions>
-      <a mat-button routerLink="/login">Already have an account? Login</a>
-    </mat-card-actions>
-  </mat-card>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="text-center mb-4">
+        <h2 class="fw-bold">Registracija</h2>
+        <p class="text-muted">Nakon registracije, administrator ce obraditi vas zahtev. Dobicete email sa obavestenjem.</p>
+      </div>
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h4 class="card-title mb-3">Register</h4>
+          <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" formControlName="email" placeholder="name@example.com">
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input type="password" class="form-control" id="password" formControlName="password">
+              <div class="form-text">Minimum 6 characters</div>
+            </div>
+            <div class="mb-3">
+              <label for="address" class="form-label">Address</label>
+              <input type="text" class="form-control" id="address" formControlName="address">
+            </div>
+            <button type="submit" class="btn btn-primary w-100" [disabled]="registerForm.invalid">
+              <i class="bi bi-person-plus me-1"></i>Register
+            </button>
+          </form>
+        </div>
+        <div class="card-footer text-center bg-light">
+          <a routerLink="/login" class="text-decoration-none">Already have an account? Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

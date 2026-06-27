@@ -1,47 +1,56 @@
-<div class="container">
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>Write a Review</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <form [formGroup]="reviewForm" (ngSubmit)="onSubmit()">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Event</mat-label>
-          <mat-select formControlName="eventId">
-            <mat-option *ngFor="let event of events" [value]="event.id">
-              {{ event.name }} ({{ event.date | date }})
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <h3>Ratings (1-10, optional)</h3>
-        <div class="ratings-grid">
-          <mat-form-field appearance="outline">
-            <mat-label>Performance</mat-label>
-            <input matInput type="number" formControlName="performance" min="1" max="10">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Sound & Lighting</mat-label>
-            <input matInput type="number" formControlName="soundAndLighting" min="1" max="10">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Venue</mat-label>
-            <input matInput type="number" formControlName="venue" min="1" max="10">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Overall Impression</mat-label>
-            <input matInput type="number" formControlName="overallImpression" min="1" max="10">
-          </mat-form-field>
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <h4 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Write a Review</h4>
         </div>
+        <div class="card-body p-4">
+          <form [formGroup]="reviewForm" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label for="eventSelect" class="form-label">Event</label>
+              <select class="form-select" id="eventSelect" formControlName="eventId">
+                <option value="" disabled selected>Select an event</option>
+                <option *ngFor="let event of events" [value]="event.id">
+                  {{ event.name }} ({{ event.date | date }})
+                </option>
+              </select>
+            </div>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Comment (optional)</mat-label>
-          <textarea matInput formControlName="comment" rows="4"></textarea>
-        </mat-form-field>
+            <h5 class="mt-4 mb-3">Ratings (1-10, optional)</h5>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="ratePerformance" class="form-label">Performance</label>
+                <input type="number" class="form-control" id="ratePerformance" formControlName="performance" min="1" max="10" placeholder="1-10">
+              </div>
+              <div class="col-md-6">
+                <label for="rateSound" class="form-label">Sound & Lighting</label>
+                <input type="number" class="form-control" id="rateSound" formControlName="soundAndLighting" min="1" max="10" placeholder="1-10">
+              </div>
+              <div class="col-md-6">
+                <label for="rateVenue" class="form-label">Venue</label>
+                <input type="number" class="form-control" id="rateVenue" formControlName="venue" min="1" max="10" placeholder="1-10">
+              </div>
+              <div class="col-md-6">
+                <label for="rateOverall" class="form-label">Overall Impression</label>
+                <input type="number" class="form-control" id="rateOverall" formControlName="overallImpression" min="1" max="10" placeholder="1-10">
+              </div>
+            </div>
 
-        <button mat-raised-button color="primary" type="submit" [disabled]="reviewForm.invalid">Submit Review</button>
-        <button mat-button type="button" routerLink="/locations/{{locationId}}">Cancel</button>
-      </form>
-    </mat-card-content>
-  </mat-card>
+            <div class="mb-4">
+              <label for="comment" class="form-label">Comment (optional)</label>
+              <textarea class="form-control" id="comment" formControlName="comment" rows="4" placeholder="Share your experience..."></textarea>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary" [disabled]="reviewForm.invalid">
+                <i class="bi bi-send me-1"></i>Submit Review
+              </button>
+              <a class="btn btn-outline-secondary" routerLink="/locations/{{locationId}}">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

@@ -1,6 +1,7 @@
 package com.ues.controller;
 
 import com.ues.dto.AccountRequestDto;
+import com.ues.dto.ManagerDto;
 import com.ues.service.AccountRequestService;
 import com.ues.service.ManagesService;
 import org.apache.logging.log4j.LogManager;
@@ -54,15 +55,21 @@ public class AdminController {
         return ResponseEntity.ok(accountRequestService.rejectRequest(id, reason));
     }
 
+    @GetMapping("/locations/{locationId}/managers")
+    public ResponseEntity<List<ManagerDto>> getManagers(@PathVariable Long locationId) {
+        logger.info("Admin fetching managers for location id={}", locationId);
+        return ResponseEntity.ok(managesService.getManagersForLocation(locationId));
+    }
+
     @PostMapping("/locations/{locationId}/managers")
     public ResponseEntity<String> assignManager(@PathVariable Long locationId,
-                                                 @RequestBody Map<String, Long> body) {
-        Long userId = body.get("userId");
-        if (userId == null) {
-            throw new IllegalArgumentException("userId is required");
+                                                 @RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("email is required");
         }
-        logger.info("Admin assigning user id={} as manager of location id={}", userId, locationId);
-        managesService.assignManager(locationId, userId);
+        logger.info("Admin assigning user email={} as manager of location id={}", email, locationId);
+        managesService.assignManager(locationId, email);
         return ResponseEntity.ok("Manager assigned successfully");
     }
 

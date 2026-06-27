@@ -200,7 +200,7 @@ public class LocationService {
         dto.setCreatedAt(location.getCreatedAt());
 
         if (location.getImage() != null) {
-            dto.setImageUrl(minioUtil.getFileUrl(location.getImage().getServerFilename()));
+            dto.setImageUrl("/api/images/" + location.getImage().getServerFilename());
         }
 
         return dto;

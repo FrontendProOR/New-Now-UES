@@ -1,65 +1,122 @@
-<div class="container">
-  <h2>Admin Dashboard</h2>
+<div class="container py-4">
+  <h2 class="mb-4">Admin Dashboard</h2>
 
-  <mat-tab-group [(selectedIndex)]="activeTab">
-    <mat-tab label="Account Requests ({{ pendingRequests.length }})">
-      <div class="tab-content">
-        <mat-card *ngFor="let req of pendingRequests" class="request-card">
-          <mat-card-header>
-            <mat-card-title>{{ req.email }}</mat-card-title>
-            <mat-card-subtitle>{{ req.createdAt | date }} · {{ req.address }}</mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-actions>
-            <button mat-raised-button color="primary" (click)="acceptRequest(req.id)">Accept</button>
-            <button mat-raised-button color="warn" (click)="rejectRequest(req.id)">Reject</button>
-          </mat-card-actions>
-        </mat-card>
-        <p *ngIf="pendingRequests.length === 0">No pending requests.</p>
+  <ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="activeTab === 0" (click)="activeTab = 0">
+        <i class="bi bi-person-check me-1"></i>Account Requests ({{ pendingRequests.length }})
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="activeTab === 1" (click)="activeTab = 1">
+        <i class="bi bi-building me-1"></i>Locations
+      </a>
+    </li>
+  </ul>
+
+  <!-- Account Requests Tab -->
+  <div *ngIf="activeTab === 0" class="pt-3">
+    <div class="table-responsive" *ngIf="pendingRequests.length > 0">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Email</th>
+            <th>Address</th>
+            <th>Date</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let req of pendingRequests">
+            <td>{{ req.email }}</td>
+            <td>{{ req.address }}</td>
+            <td>{{ req.createdAt | date }}</td>
+            <td class="text-end">
+              <button class="btn btn-success btn-sm me-2" (click)="acceptRequest(req.id)">
+                <i class="bi bi-check-lg me-1"></i>Accept
+              </button>
+              <button class="btn btn-danger btn-sm" (click)="rejectRequest(req.id)">
+                <i class="bi bi-x-lg me-1"></i>Reject
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="alert alert-info" *ngIf="pendingRequests.length === 0">No pending requests.</div>
+  </div>
+
+  <!-- Locations Tab -->
+  <div *ngIf="activeTab === 1" class="pt-3">
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Create Location</h5>
       </div>
-    </mat-tab>
-
-    <mat-tab label="Locations">
-      <div class="tab-content">
-        <mat-card class="form-card">
-          <mat-card-header><mat-card-title>Create Location</mat-card-title></mat-card-header>
-          <mat-card-content>
-            <form [formGroup]="locationForm" (ngSubmit)="createLocation()" class="create-form">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Name</mat-label>
-                <input matInput formControlName="name">
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Address</mat-label>
-                <input matInput formControlName="address">
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Type</mat-label>
-                <input matInput formControlName="type">
-              </mat-form-field>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Description</mat-label>
-                <textarea matInput formControlName="description" rows="3"></textarea>
-              </mat-form-field>
-              <div class="file-input"><label>Image *:</label> <input type="file" (change)="onImageSelected($event)" accept="image/*"></div>
-              <div class="file-input"><label>PDF (optional):</label> <input type="file" (change)="onPdfSelected($event)" accept=".pdf"></div>
-              <button mat-raised-button color="primary" type="submit" [disabled]="locationForm.invalid || !selectedImage">Create</button>
-            </form>
-          </mat-card-content>
-        </mat-card>
-
-        <h3>Existing Locations</h3>
-        <mat-card *ngFor="let loc of locations" class="location-card">
-          <mat-card-header>
-            <mat-card-title>{{ loc.name }}</mat-card-title>
-            <mat-card-subtitle>{{ loc.address }} · {{ loc.type }}</mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-actions>
-            <button mat-button color="primary" (click)="assignManager(loc.id)">Assign Manager</button>
-            <button mat-button (click)="removeManager(loc.id)">Remove Manager</button>
-            <button mat-button color="warn" (click)="deleteLocation(loc.id)">Delete</button>
-          </mat-card-actions>
-        </mat-card>
+      <div class="card-body">
+        <form [formGroup]="locationForm" (ngSubmit)="createLocation()">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="locName" class="form-label">Name</label>
+              <input type="text" class="form-control" id="locName" formControlName="name">
+            </div>
+            <div class="col-md-6">
+              <label for="locAddress" class="form-label">Address</label>
+              <input type="text" class="form-control" id="locAddress" formControlName="address">
+            </div>
+            <div class="col-md-6">
+              <label for="locType" class="form-label">Type</label>
+              <input type="text" class="form-control" id="locType" formControlName="type">
+            </div>
+            <div class="col-12">
+              <label for="locDescription" class="form-label">Description</label>
+              <textarea class="form-control" id="locDescription" formControlName="description" rows="3"></textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Image *</label>
+              <input type="file" class="form-control" (change)="onImageSelected($event)" accept="image/*">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">PDF (optional)</label>
+              <input type="file" class="form-control" (change)="onPdfSelected($event)" accept=".pdf">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary mt-3" [disabled]="locationForm.invalid || !selectedImage">
+            <i class="bi bi-plus-lg me-1"></i>Create
+          </button>
+        </form>
       </div>
-    </mat-tab>
-  </mat-tab-group>
+    </div>
+
+    <h5 class="mb-3">Existing Locations</h5>
+    <div class="table-responsive" *ngIf="locations.length > 0">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Address</th>
+            <th>Type</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let loc of locations">
+            <td><strong>{{ loc.name }}</strong></td>
+            <td>{{ loc.address }}</td>
+            <td>{{ loc.type }}</td>
+            <td class="text-end">
+              <button class="btn btn-outline-primary btn-sm me-1" (click)="assignManager(loc.id)">
+                <i class="bi bi-person-plus me-1"></i>Assign Manager
+              </button>
+              <button class="btn btn-outline-secondary btn-sm me-1" (click)="removeManager(loc.id)">
+                <i class="bi bi-person-dash me-1"></i>Remove Manager
+              </button>
+              <button class="btn btn-danger btn-sm" (click)="deleteLocation(loc.id)">
+                <i class="bi bi-trash me-1"></i>Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>

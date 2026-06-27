@@ -144,7 +144,7 @@ public class UserService {
         dto.setCreatedAt(user.getCreatedAt());
 
         if (user.getProfileImage() != null) {
-            dto.setImageUrl(minioUtil.getFileUrl(user.getProfileImage().getServerFilename()));
+            dto.setImageUrl("/api/images/" + user.getProfileImage().getServerFilename());
         }
 
         return dto;

@@ -3,3 +3,42 @@ html, body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
+
+/* Bootstrap overrides */
+.navbar {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+  transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-img-top {
+  height: 200px;
+  object-fit: cover;
+}
+
+.nav-tabs .nav-link {
+  cursor: pointer;
+}
+
+.nav-tabs .nav-link.active {
+  font-weight: 500;
+}
+
+/* Ensure mat-snackbar still works */
+.mat-mdc-snack-bar-container {
+  z-index: 9999;
+}
+
+/* Search highlight styles */
+em {
+  background-color: #fff3cd;
+  font-style: normal;
+  padding: 0 2px;
+  border-radius: 2px;
+}

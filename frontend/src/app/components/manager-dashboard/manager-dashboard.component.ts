@@ -18,6 +18,7 @@ export class ManagerDashboardComponent implements OnInit {
   reviews: Review[] = [];
   analytics: Analytics | null = null;
   period = 'monthly';
+  activeManagerTab = 0;
 
   eventForm: FormGroup;
   selectedEventImage: File | null = null;
