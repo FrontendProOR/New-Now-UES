@@ -99,24 +99,77 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let loc of locations">
-            <td><strong>{{ loc.name }}</strong></td>
-            <td>{{ loc.address }}</td>
-            <td>{{ loc.type }}</td>
-            <td class="text-end">
-              <button class="btn btn-outline-primary btn-sm me-1" (click)="assignManager(loc.id)">
-                <i class="bi bi-person-plus me-1"></i>Assign Manager
-              </button>
-              <button class="btn btn-outline-secondary btn-sm me-1" (click)="removeManager(loc.id)">
-                <i class="bi bi-person-dash me-1"></i>Remove Manager
-              </button>
-              <button class="btn btn-danger btn-sm" (click)="deleteLocation(loc.id)">
-                <i class="bi bi-trash me-1"></i>Delete
-              </button>
-            </td>
-          </tr>
+          <ng-container *ngFor="let loc of locations">
+            <tr>
+              <td><strong>{{ loc.name }}</strong></td>
+              <td>{{ loc.address }}</td>
+              <td>{{ loc.type }}</td>
+              <td class="text-end">
+                <button class="btn btn-outline-primary btn-sm me-1" (click)="assignManager(loc.id)">
+                  <i class="bi bi-person-plus me-1"></i>Assign
+                </button>
+                <button class="btn btn-outline-secondary btn-sm me-1" (click)="openManagerModal(loc)">
+                  <i class="bi bi-people me-1"></i>Managers
+                </button>
+                <button class="btn btn-danger btn-sm" (click)="deleteLocation(loc.id)">
+                  <i class="bi bi-trash me-1"></i>Delete
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="assignLocationId === loc.id" class="table-warning">
+              <td colspan="4">
+                <div class="d-flex align-items-center gap-2 py-2">
+                  <label class="fw-bold text-nowrap mb-0">Assign manager to {{ loc.name }}:</label>
+                  <input type="email" class="form-control form-control-sm" style="max-width: 300px;"
+                         [(ngModel)]="managerEmail" placeholder="user&#64;example.com">
+                  <button class="btn btn-success btn-sm" (click)="submitAssignManager()" [disabled]="!managerEmail.trim()">
+                    <i class="bi bi-check-lg"></i> Assign
+                  </button>
+                  <button class="btn btn-outline-secondary btn-sm" (click)="cancelAssign()">Cancel</button>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
         </tbody>
       </table>
+    </div>
+    <div class="alert alert-info" *ngIf="locations.length === 0">No locations yet.</div>
+  </div>
+</div>
+
+<!-- Manager List Modal -->
+<div class="modal-backdrop fade show" *ngIf="showManagerModal" (click)="closeManagerModal()"></div>
+<div class="modal fade show d-block" tabindex="-1" *ngIf="showManagerModal">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-people me-2"></i>Managers — {{ modalLocationName }}
+        </h5>
+        <button type="button" class="btn-close" (click)="closeManagerModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="modalManagers.length > 0">
+          <div class="list-group">
+            <div class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let mgr of modalManagers">
+              <div>
+                <strong>{{ mgr.name || 'No name' }}</strong>
+                <br>
+                <small class="text-muted">{{ mgr.email }} &middot; Since {{ mgr.startDate | date }}</small>
+              </div>
+              <button class="btn btn-outline-danger btn-sm" (click)="removeManagerFromModal(mgr.userId)">
+                <i class="bi bi-person-dash me-1"></i>Remove
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="alert alert-info mb-0" *ngIf="modalManagers.length === 0">
+          No managers assigned to this location.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeManagerModal()">Close</button>
+      </div>
     </div>
   </div>
 </div>

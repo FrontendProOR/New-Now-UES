@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AdminService } from '../../services/admin.service';
+import { AdminService, ManagerDto } from '../../services/admin.service';
 import { LocationService } from '../../services/location.service';
 import { AccountRequest, Location } from '../../models';
 
@@ -17,6 +17,14 @@ export class AdminDashboardComponent implements OnInit {
   selectedImage: File | null = null;
   selectedPdf: File | null = null;
   activeTab = 0;
+
+  managerEmail = '';
+  assignLocationId: number | null = null;
+
+  modalLocationId: number | null = null;
+  modalLocationName = '';
+  modalManagers: ManagerDto[] = [];
+  showManagerModal = false;
 
   constructor(private adminService: AdminService,
               private locationService: LocationService,
@@ -84,32 +92,66 @@ export class AdminDashboardComponent implements OnInit {
         this.selectedPdf = null;
         this.loadLocations();
       },
-      error: (err) => this.snackBar.open(err.error?.error || 'Error', 'Close', { duration: 3000 })
+      error: (err) => this.snackBar.open(err.error?.error || 'Error creating location', 'Close', { duration: 3000 })
     });
   }
 
   deleteLocation(id: number): void {
-    if (!confirm('Delete this location?')) return;
+    if (!confirm('Are you sure? This will delete all events, reviews, and managers for this location.')) return;
     this.adminService.deleteLocation(id).subscribe({
-      next: () => { this.snackBar.open('Location deleted', 'Close', { duration: 3000 }); this.loadLocations(); }
+      next: () => { this.snackBar.open('Location deleted', 'Close', { duration: 3000 }); this.loadLocations(); },
+      error: (err) => this.snackBar.open(err.error?.error || 'Error deleting location', 'Close', { duration: 3000 })
     });
   }
 
   assignManager(locationId: number): void {
-    const userId = prompt('Enter user ID to assign as manager:');
-    if (!userId) return;
-    this.adminService.assignManager(locationId, Number(userId)).subscribe({
-      next: () => this.snackBar.open('Manager assigned', 'Close', { duration: 3000 }),
-      error: (err) => this.snackBar.open(err.error?.error || 'Error', 'Close', { duration: 3000 })
+    this.assignLocationId = locationId;
+    this.managerEmail = '';
+  }
+
+  submitAssignManager(): void {
+    if (!this.assignLocationId || !this.managerEmail.trim()) return;
+    this.adminService.assignManager(this.assignLocationId, this.managerEmail.trim()).subscribe({
+      next: () => {
+        this.snackBar.open('Manager assigned', 'Close', { duration: 3000 });
+        this.assignLocationId = null;
+        this.managerEmail = '';
+      },
+      error: (err) => this.snackBar.open(err.error?.error || 'Error assigning manager', 'Close', { duration: 3000 })
     });
   }
 
-  removeManager(locationId: number): void {
-    const userId = prompt('Enter user ID to remove:');
-    if (!userId) return;
-    this.adminService.removeManager(locationId, Number(userId)).subscribe({
-      next: () => this.snackBar.open('Manager removed', 'Close', { duration: 3000 }),
-      error: (err) => this.snackBar.open(err.error?.error || 'Error', 'Close', { duration: 3000 })
+  cancelAssign(): void {
+    this.assignLocationId = null;
+    this.managerEmail = '';
+  }
+
+  openManagerModal(loc: Location): void {
+    this.modalLocationId = loc.id;
+    this.modalLocationName = loc.name;
+    this.showManagerModal = true;
+    this.loadModalManagers();
+  }
+
+  loadModalManagers(): void {
+    if (!this.modalLocationId) return;
+    this.adminService.getManagers(this.modalLocationId).subscribe(data => this.modalManagers = data);
+  }
+
+  closeManagerModal(): void {
+    this.showManagerModal = false;
+    this.modalLocationId = null;
+    this.modalManagers = [];
+  }
+
+  removeManagerFromModal(userId: number): void {
+    if (!this.modalLocationId) return;
+    this.adminService.removeManager(this.modalLocationId, userId).subscribe({
+      next: () => {
+        this.snackBar.open('Manager removed', 'Close', { duration: 3000 });
+        this.loadModalManagers();
+      },
+      error: (err) => this.snackBar.open(err.error?.error || 'Error removing manager', 'Close', { duration: 3000 })
     });
   }
 }

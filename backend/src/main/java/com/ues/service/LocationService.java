@@ -3,8 +3,7 @@ package com.ues.service;
 import com.ues.dto.LocationDto;
 import com.ues.model.Image;
 import com.ues.model.Location;
-import com.ues.repository.ImageRepository;
-import com.ues.repository.LocationRepository;
+import com.ues.repository.*;
 import com.ues.util.MinioUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,15 +21,27 @@ public class LocationService {
 
     private final LocationRepository locationRepository;
     private final ImageRepository imageRepository;
+    private final EventRepository eventRepository;
+    private final ReviewRepository reviewRepository;
+    private final CommentRepository commentRepository;
+    private final ManagesRepository managesRepository;
     private final MinioUtil minioUtil;
     private final LocationIndexService locationIndexService;
 
     public LocationService(LocationRepository locationRepository,
                            ImageRepository imageRepository,
+                           EventRepository eventRepository,
+                           ReviewRepository reviewRepository,
+                           CommentRepository commentRepository,
+                           ManagesRepository managesRepository,
                            MinioUtil minioUtil,
                            @Lazy LocationIndexService locationIndexService) {
         this.locationRepository = locationRepository;
         this.imageRepository = imageRepository;
+        this.eventRepository = eventRepository;
+        this.reviewRepository = reviewRepository;
+        this.commentRepository = commentRepository;
+        this.managesRepository = managesRepository;
         this.locationIndexService = locationIndexService;
         this.minioUtil = minioUtil;
     }
@@ -119,35 +130,69 @@ public class LocationService {
         Location location = locationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Location not found with id: " + id));
 
-        // MinIO brisanje PRE baze
+        // 1. Brisanje komentara svih recenzija ove lokacije
+        var reviews = reviewRepository.findByLocationIdAndDeletedFalse(id);
+        for (var review : reviews) {
+            commentRepository.deleteAll(commentRepository.findByReviewIdAndParentIsNull(review.getId()));
+        }
+        // Briše i sve ostale komentare vezane za recenzije
+        var allReviews = reviewRepository.findAll().stream()
+                .filter(r -> r.getLocation().getId().equals(id))
+                .toList();
+        for (var review : allReviews) {
+            commentRepository.deleteAll(review.getComments());
+        }
+
+        // 2. Brisanje recenzija
+        reviewRepository.deleteAll(allReviews);
+        logger.info("Deleted {} reviews for location id={}", allReviews.size(), id);
+
+        // 3. Brisanje događaja (sa slikama iz MinIO)
+        var events = eventRepository.findByLocationId(id);
+        for (var event : events) {
+            if (event.getImage() != null) {
+                try {
+                    minioUtil.deleteFile(event.getImage().getServerFilename());
+                } catch (Exception e) {
+                    logger.warn("Failed to delete event image from MinIO: {}", e.getMessage());
+                }
+            }
+        }
+        eventRepository.deleteAll(events);
+        logger.info("Deleted {} events for location id={}", events.size(), id);
+
+        // 4. Brisanje manages zapisa
+        managesRepository.deleteAll(managesRepository.findByLocationId(id));
+
+        // 5. MinIO brisanje slike lokacije
         if (location.getImage() != null) {
             try {
                 minioUtil.deleteFile(location.getImage().getServerFilename());
-                logger.info("Deleted image from MinIO for location id={}", id);
             } catch (Exception e) {
-                logger.error("Failed to delete image from MinIO for location id={}: {}", id, e.getMessage());
-                throw new RuntimeException("Failed to delete image from storage. Location not deleted.", e);
+                logger.warn("Failed to delete location image from MinIO: {}", e.getMessage());
             }
         }
 
+        // 6. MinIO brisanje PDF-a
         if (location.getDescriptionDocument() != null) {
             try {
                 minioUtil.deleteFile(location.getDescriptionDocument().getServerFilename());
-                logger.info("Deleted PDF from MinIO for location id={}", id);
             } catch (Exception e) {
-                logger.warn("Failed to delete PDF from MinIO for location id={}: {}", id, e.getMessage());
+                logger.warn("Failed to delete PDF from MinIO: {}", e.getMessage());
             }
         }
 
+        // 7. Brisanje lokacije iz baze
         locationRepository.delete(location);
 
+        // 8. Brisanje iz ES indeksa
         try {
             locationIndexService.deleteIndex(id);
         } catch (Exception e) {
             logger.warn("Failed to delete ES index for location id={}: {}", id, e.getMessage());
         }
 
-        logger.info("Deleted location id={}", id);
+        logger.info("Deleted location id={} with all dependencies", id);
     }
 
     public LocationDto getLocation(Long id) {

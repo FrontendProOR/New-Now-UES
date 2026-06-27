@@ -12,10 +12,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 
 @RestController
-@RequestMapping("/api/images")
 public class ImageController {
 
     private static final Logger logger = LogManager.getLogger(ImageController.class);
+    private static final String PATH_PREFIX = "/api/images/";
 
     private final MinioUtil minioUtil;
 
@@ -23,26 +23,24 @@ public class ImageController {
         this.minioUtil = minioUtil;
     }
 
-    /**
-     * Serves image files from MinIO storage.
-     * URL pattern: /api/images/{folder}/{filename}
-     * Example: /api/images/locations/abc-123.jpg
-     *
-     * This endpoint is public (no auth required) so that <img> tags work without tokens.
-     */
-    @GetMapping("/**")
+    @GetMapping("/api/images/**")
     public ResponseEntity<byte[]> getImage(HttpServletRequest request) {
-        // Extract the object name from the URL path after "/api/images/"
-        String fullPath = request.getRequestURI();
-        String objectName = fullPath.substring(fullPath.indexOf("/api/images/") + "/api/images/".length());
+        String requestUri = request.getRequestURI();
+        int prefixIndex = requestUri.indexOf(PATH_PREFIX);
+        if (prefixIndex == -1) {
+            logger.warn("Invalid image request: {}", requestUri);
+            return ResponseEntity.badRequest().build();
+        }
 
+        String objectName = requestUri.substring(prefixIndex + PATH_PREFIX.length());
         if (objectName.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
 
+        logger.debug("Serving image: {}", objectName);
+
         try (InputStream inputStream = minioUtil.getFile(objectName)) {
             byte[] imageBytes = inputStream.readAllBytes();
-
             MediaType mediaType = determineMediaType(objectName);
 
             return ResponseEntity.ok()
@@ -58,17 +56,10 @@ public class ImageController {
 
     private MediaType determineMediaType(String objectName) {
         String lower = objectName.toLowerCase();
-        if (lower.endsWith(".png")) {
-            return MediaType.IMAGE_PNG;
-        } else if (lower.endsWith(".gif")) {
-            return MediaType.IMAGE_GIF;
-        } else if (lower.endsWith(".webp")) {
-            return MediaType.parseMediaType("image/webp");
-        } else if (lower.endsWith(".svg")) {
-            return MediaType.parseMediaType("image/svg+xml");
-        } else {
-            // Default to JPEG for .jpg, .jpeg, and anything else
-            return MediaType.IMAGE_JPEG;
-        }
+        if (lower.endsWith(".png")) return MediaType.IMAGE_PNG;
+        if (lower.endsWith(".gif")) return MediaType.IMAGE_GIF;
+        if (lower.endsWith(".webp")) return MediaType.parseMediaType("image/webp");
+        if (lower.endsWith(".svg")) return MediaType.parseMediaType("image/svg+xml");
+        return MediaType.IMAGE_JPEG;
     }
 }

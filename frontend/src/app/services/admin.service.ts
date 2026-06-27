@@ -4,6 +4,13 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AccountRequest, Location } from '../models';
 
+export interface ManagerDto {
+  userId: number;
+  email: string;
+  name: string;
+  startDate: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdminService {
 
@@ -43,8 +50,12 @@ export class AdminService {
     return this.http.post(`${this.apiUrl}/locations/${locationId}/pdf`, formData, { responseType: 'text' });
   }
 
-  assignManager(locationId: number, userId: number): Observable<string> {
-    return this.http.post(`${this.apiUrl}/locations/${locationId}/managers`, { userId }, { responseType: 'text' });
+  getManagers(locationId: number): Observable<ManagerDto[]> {
+    return this.http.get<ManagerDto[]>(`${this.apiUrl}/locations/${locationId}/managers`);
+  }
+
+  assignManager(locationId: number, email: string): Observable<string> {
+    return this.http.post(`${this.apiUrl}/locations/${locationId}/managers`, { email }, { responseType: 'text' });
   }
 
   removeManager(locationId: number, userId: number): Observable<void> {
