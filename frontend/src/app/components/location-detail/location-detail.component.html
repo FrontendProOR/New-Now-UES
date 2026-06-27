@@ -56,13 +56,90 @@
         </div>
         <div class="mb-2" *ngIf="review.rate">
           <span class="badge bg-secondary me-1" *ngIf="review.rate.performance">Performance: {{ review.rate.performance }}/10</span>
-          <span class="badge bg-secondary me-1" *ngIf="review.rate.soundAndLighting">Sound & Light: {{ review.rate.soundAndLighting }}/10</span>
+          <span class="badge bg-secondary me-1" *ngIf="review.rate.soundAndLighting">Sound &amp; Light: {{ review.rate.soundAndLighting }}/10</span>
           <span class="badge bg-secondary me-1" *ngIf="review.rate.venue">Venue: {{ review.rate.venue }}/10</span>
           <span class="badge bg-primary" *ngIf="review.rate.overallImpression">Overall: {{ review.rate.overallImpression }}/10</span>
         </div>
-        <p class="comment-text mb-0" *ngIf="review.rootComment">{{ review.rootComment }}</p>
+        <p class="fst-italic mb-2" *ngIf="review.rootComment">{{ review.rootComment }}</p>
+
+        <!-- Comment actions -->
+        <div class="d-flex gap-2 mt-2">
+          <button class="btn btn-outline-secondary btn-sm" (click)="toggleComments(review.id)">
+            <i class="bi bi-chat-dots me-1"></i>
+            {{ expandedReviews[review.id] ? 'Hide' : 'Show' }} Replies
+          </button>
+          <button class="btn btn-outline-primary btn-sm" (click)="startReplyToReview(review.id)">
+            <i class="bi bi-reply me-1"></i>Reply
+          </button>
+        </div>
+
+        <!-- Reply to review (root comment) -->
+        <div class="mt-2" *ngIf="replyingTo?.reviewId === review.id">
+          <div class="d-flex gap-2">
+            <textarea class="form-control form-control-sm" rows="2" [(ngModel)]="replyText" placeholder="Write a comment..."></textarea>
+            <div class="d-flex flex-column gap-1">
+              <button class="btn btn-primary btn-sm" (click)="submitReply()" [disabled]="!replyText.trim()">
+                <i class="bi bi-send"></i>
+              </button>
+              <button class="btn btn-outline-secondary btn-sm" (click)="cancelReply()">
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comment tree -->
+        <div class="mt-3 border-start border-2 ps-3" *ngIf="expandedReviews[review.id] && commentTrees[review.id]">
+          <ng-container *ngFor="let comment of commentTrees[review.id]">
+            <ng-container *ngTemplateOutlet="commentNode; context: { $implicit: comment, depth: 0 }"></ng-container>
+          </ng-container>
+          <p class="text-muted small mb-0" *ngIf="commentTrees[review.id]?.length === 0">No comments yet.</p>
+        </div>
       </div>
     </div>
     <div class="alert alert-info" *ngIf="reviews.length === 0">No reviews yet.</div>
   </div>
 </div>
+
+<!-- Recursive comment template -->
+<ng-template #commentNode let-comment let-depth="depth">
+  <div class="mb-2" [style.margin-left.px]="depth * 24">
+    <div class="d-flex align-items-start gap-2">
+      <div class="flex-grow-1">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <strong class="small">{{ comment.authorName }}</strong>
+          <span class="badge rounded-pill" [class.bg-success]="comment.authorRole === 'ROLE_MANAGER' || comment.authorRole === 'ROLE_ADMIN'" [class.bg-secondary]="comment.authorRole === 'ROLE_USER'">
+            {{ comment.authorRole === 'ROLE_MANAGER' ? 'Manager' : (comment.authorRole === 'ROLE_ADMIN' ? 'Admin' : 'User') }}
+          </span>
+          <small class="text-muted">{{ comment.createdAt | date:'short' }}</small>
+        </div>
+        <p class="mb-1 small">{{ comment.text }}</p>
+        <button class="btn btn-link btn-sm p-0 text-decoration-none" (click)="startReplyToComment(comment.id)">
+          <i class="bi bi-reply me-1"></i>Reply
+        </button>
+
+        <!-- Reply to this comment -->
+        <div class="mt-1" *ngIf="replyingTo?.commentId === comment.id">
+          <div class="d-flex gap-2">
+            <textarea class="form-control form-control-sm" rows="2" [(ngModel)]="replyText" placeholder="Reply..."></textarea>
+            <div class="d-flex flex-column gap-1">
+              <button class="btn btn-primary btn-sm" (click)="submitReply()" [disabled]="!replyText.trim()">
+                <i class="bi bi-send"></i>
+              </button>
+              <button class="btn btn-outline-secondary btn-sm" (click)="cancelReply()">
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recursive replies -->
+    <ng-container *ngIf="comment.replies && comment.replies.length > 0">
+      <ng-container *ngFor="let reply of comment.replies">
+        <ng-container *ngTemplateOutlet="commentNode; context: { $implicit: reply, depth: depth + 1 }"></ng-container>
+      </ng-container>
+    </ng-container>
+  </div>
+</ng-template>

@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { LocationRoutingModule } from './location-routing.module';
@@ -11,7 +11,7 @@ import { CreateReviewComponent } from '../../components/create-review/create-rev
 @NgModule({
   declarations: [LocationListComponent, LocationDetailComponent, CreateReviewComponent],
   imports: [
-    CommonModule, ReactiveFormsModule, RouterModule, LocationRoutingModule,
+    CommonModule, FormsModule, ReactiveFormsModule, RouterModule, LocationRoutingModule,
     MatSnackBarModule
   ]
 })

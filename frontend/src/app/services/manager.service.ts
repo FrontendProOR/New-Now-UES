@@ -24,6 +24,14 @@ export class ManagerService {
     return this.http.delete<void>(`${this.apiUrl}/events/${id}`);
   }
 
+  getLocationEvents(locationId: number): Observable<Event[]> {
+    return this.http.get<Event[]>(`${this.apiUrl}/locations/${locationId}/events`);
+  }
+
+  getLocationDetails(locationId: number): Observable<Location> {
+    return this.http.get<Location>(`${this.apiUrl}/locations/${locationId}`);
+  }
+
   getLocationReviews(locationId: number, sortBy?: string, direction?: string): Observable<Review[]> {
     let params = new HttpParams();
     if (sortBy) params = params.set('sortBy', sortBy);

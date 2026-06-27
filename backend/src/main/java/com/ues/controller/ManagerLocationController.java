@@ -23,6 +23,12 @@ public class ManagerLocationController {
         this.locationService = locationService;
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<LocationDto> getLocation(@PathVariable Long id) {
+        logger.info("Manager fetching location id={}", id);
+        return ResponseEntity.ok(locationService.getLocation(id));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<LocationDto> updateLocation(@PathVariable Long id,
                                                        @RequestBody Map<String, String> body) {

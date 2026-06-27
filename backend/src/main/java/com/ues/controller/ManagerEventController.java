@@ -25,6 +25,12 @@ public class ManagerEventController {
         this.eventService = eventService;
     }
 
+    @GetMapping("/locations/{locationId}/events")
+    public ResponseEntity<java.util.List<EventDto>> getEvents(@PathVariable Long locationId) {
+        logger.info("Manager fetching events for location id={}", locationId);
+        return ResponseEntity.ok(eventService.getEventsByLocation(locationId));
+    }
+
     @PostMapping("/locations/{locationId}/events")
     public ResponseEntity<EventDto> createEvent(
             @PathVariable Long locationId,

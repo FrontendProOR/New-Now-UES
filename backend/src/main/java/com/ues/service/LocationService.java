@@ -1,10 +1,12 @@
 package com.ues.service;
 
 import com.ues.dto.LocationDto;
+import com.ues.model.DescriptionDocument;
 import com.ues.model.Image;
 import com.ues.model.Location;
 import com.ues.repository.*;
 import com.ues.util.MinioUtil;
+import jakarta.persistence.EntityManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Lazy;
@@ -25,8 +27,10 @@ public class LocationService {
     private final ReviewRepository reviewRepository;
     private final CommentRepository commentRepository;
     private final ManagesRepository managesRepository;
+    private final DescriptionDocumentRepository descriptionDocumentRepository;
     private final MinioUtil minioUtil;
     private final LocationIndexService locationIndexService;
+    private final EntityManager entityManager;
 
     public LocationService(LocationRepository locationRepository,
                            ImageRepository imageRepository,
@@ -34,16 +38,20 @@ public class LocationService {
                            ReviewRepository reviewRepository,
                            CommentRepository commentRepository,
                            ManagesRepository managesRepository,
+                           DescriptionDocumentRepository descriptionDocumentRepository,
                            MinioUtil minioUtil,
-                           @Lazy LocationIndexService locationIndexService) {
+                           @Lazy LocationIndexService locationIndexService,
+                           EntityManager entityManager) {
         this.locationRepository = locationRepository;
         this.imageRepository = imageRepository;
         this.eventRepository = eventRepository;
         this.reviewRepository = reviewRepository;
         this.commentRepository = commentRepository;
         this.managesRepository = managesRepository;
+        this.descriptionDocumentRepository = descriptionDocumentRepository;
         this.locationIndexService = locationIndexService;
         this.minioUtil = minioUtil;
+        this.entityManager = entityManager;
     }
 
     @Transactional
@@ -130,62 +138,95 @@ public class LocationService {
         Location location = locationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Location not found with id: " + id));
 
-        // 1. Brisanje komentara svih recenzija ove lokacije
-        var reviews = reviewRepository.findByLocationIdAndDeletedFalse(id);
-        for (var review : reviews) {
-            commentRepository.deleteAll(commentRepository.findByReviewIdAndParentIsNull(review.getId()));
-        }
-        // Briše i sve ostale komentare vezane za recenzije
+        // 1. Delete all comments for all reviews of this location
+        //    Must delete replies (children) before parents due to self-referencing FK
         var allReviews = reviewRepository.findAll().stream()
                 .filter(r -> r.getLocation().getId().equals(id))
                 .toList();
         for (var review : allReviews) {
-            commentRepository.deleteAll(review.getComments());
+            // First delete replies (comments that have a parent)
+            var replies = commentRepository.findByReviewIdAndParentIsNotNull(review.getId());
+            commentRepository.deleteAll(replies);
+            // Then delete top-level comments
+            var topLevelComments = commentRepository.findByReviewIdAndParentIsNull(review.getId());
+            commentRepository.deleteAll(topLevelComments);
         }
+        entityManager.flush();
 
-        // 2. Brisanje recenzija
+        // 2. Delete all reviews (cascade=ALL on Review.rate will delete Rate entities)
         reviewRepository.deleteAll(allReviews);
+        entityManager.flush();
         logger.info("Deleted {} reviews for location id={}", allReviews.size(), id);
 
-        // 3. Brisanje događaja (sa slikama iz MinIO)
+        // 3. Delete events: break FK to Image first, then delete Image, then delete Event
         var events = eventRepository.findByLocationId(id);
+        var eventImageIds = new java.util.ArrayList<Long>();
         for (var event : events) {
             if (event.getImage() != null) {
+                eventImageIds.add(event.getImage().getId());
                 try {
                     minioUtil.deleteFile(event.getImage().getServerFilename());
                 } catch (Exception e) {
                     logger.warn("Failed to delete event image from MinIO: {}", e.getMessage());
                 }
+                // Break the FK reference before deleting the Image
+                event.setImage(null);
+                eventRepository.save(event);
             }
         }
+        entityManager.flush();
+        // Now delete the orphaned Image entities
+        for (Long imageId : eventImageIds) {
+            imageRepository.deleteById(imageId);
+        }
+        // Delete the events themselves
         eventRepository.deleteAll(events);
+        entityManager.flush();
         logger.info("Deleted {} events for location id={}", events.size(), id);
 
-        // 4. Brisanje manages zapisa
+        // 4. Delete manages records
         managesRepository.deleteAll(managesRepository.findByLocationId(id));
+        entityManager.flush();
 
-        // 5. MinIO brisanje slike lokacije
-        if (location.getImage() != null) {
+        // 5. Break FK references from Location to Image and DescriptionDocument
+        Image locationImage = location.getImage();
+        DescriptionDocument locationDoc = location.getDescriptionDocument();
+
+        // Delete files from MinIO
+        if (locationImage != null) {
             try {
-                minioUtil.deleteFile(location.getImage().getServerFilename());
+                minioUtil.deleteFile(locationImage.getServerFilename());
             } catch (Exception e) {
                 logger.warn("Failed to delete location image from MinIO: {}", e.getMessage());
             }
         }
-
-        // 6. MinIO brisanje PDF-a
-        if (location.getDescriptionDocument() != null) {
+        if (locationDoc != null) {
             try {
-                minioUtil.deleteFile(location.getDescriptionDocument().getServerFilename());
+                minioUtil.deleteFile(locationDoc.getServerFilename());
             } catch (Exception e) {
                 logger.warn("Failed to delete PDF from MinIO: {}", e.getMessage());
             }
         }
 
-        // 7. Brisanje lokacije iz baze
+        // Null out FK references and save, so Hibernate no longer tracks them from Location
+        location.setImage(null);
+        location.setDescriptionDocument(null);
+        locationRepository.save(location);
+        entityManager.flush();
+
+        // 6. Delete the orphaned Image and DescriptionDocument entities
+        if (locationImage != null) {
+            imageRepository.deleteById(locationImage.getId());
+        }
+        if (locationDoc != null) {
+            descriptionDocumentRepository.deleteById(locationDoc.getId());
+        }
+        entityManager.flush();
+
+        // 7. Delete the location itself
         locationRepository.delete(location);
 
-        // 8. Brisanje iz ES indeksa
+        // 8. Delete from ES index
         try {
             locationIndexService.deleteIndex(id);
         } catch (Exception e) {
